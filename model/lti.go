@@ -7,7 +7,9 @@ import (
 )
 
 const (
-	EDX_LMS_TYPE = "edx"
+	LMS_TYPE_FIELD = "Type"
+
+	LMS_TYPE_EDX = "edx"
 )
 
 type LMSOAuthSettings struct {
@@ -51,8 +53,8 @@ func (l *LTISettings) GetKnownLMSs() []interface{} {
 			mlog.Error("Error in json.Marshal: " + err.Error())
 			continue
 		}
-		switch lms.(map[string]interface{})["Type"].(string) {
-		case EDX_LMS_TYPE:
+		switch lms.(map[string]interface{})[LMS_TYPE_FIELD].(string) {
+		case LMS_TYPE_EDX:
 			var decodedEdx EdxLMSSettings
 			if json.Unmarshal(enc, &decodedEdx) == nil {
 				ret = append(ret, decodedEdx)
