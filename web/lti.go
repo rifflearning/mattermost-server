@@ -1,7 +1,6 @@
 package web
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/mattermost/mattermost-server/mlog"
@@ -41,7 +40,7 @@ func loginWithLti(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p := utils.NewProvider(ltiConsumerSecret, fmt.Sprintf("%s%s", c.GetSiteURLHeader(), c.Path))
+	p := utils.NewProvider(ltiConsumerSecret, c.GetSiteURLHeader()+c.Path)
 	p.ConsumerKey = ltiConsumerKey
 	if ok, err := p.IsValid(r); err != nil || ok == false {
 		mlog.Error("Invalid LTI request: " + err.Error())
@@ -49,5 +48,5 @@ func loginWithLti(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, c.GetSiteURLHeader(), http.StatusFound)
+	http.Redirect(w, r, c.GetSiteURLHeader()+"/signup_lti", http.StatusFound)
 }
