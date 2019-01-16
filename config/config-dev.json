@@ -326,6 +326,58 @@
         "LoginButtonBorderColor": "",
         "LoginButtonTextColor": ""
     },
+    "LTISettings": {
+        "Enable": true,
+        "Lmss": [
+            {
+                "Name": "Emeritus",
+                "Type": "canvas",
+                "Oauth": {
+                    "ConsumerKey": "canvas-emeritus_5863",
+                    "ConsumerSecret": "emeritus secret"
+                },
+                "UserChannels": {
+                    "Type": "emeritus-group",
+                    "AuthorizationToken": "dummy~value",
+                    "ChannelList":
+                    [
+                        {
+                            "CourseType": "plg",
+                            "NameRegEx": "^riff_PLG_"
+                        },
+                        {
+                            "CourseType": "capstone",
+                            "NameRegEx": "^riff_Team_"
+                        }
+                    ]
+                }
+            },
+            {
+                "Name": "Appsembler",
+                "Type": "edx",
+                "Oauth": {
+                    "ConsumerKey": "edx-appsembler-test_5345",
+                    "ConsumerSecret": "secret"
+                },
+                "UserChannels": {
+                    "Type": "custom-properties",
+                    "ChannelList":
+                    [
+                        {
+                            "CourseType": "plg",
+                            "NameProperty": "custom_cohort_name",
+                            "IdProperty": "custom_cohort_id"
+                        },
+                        {
+                            "CourseType": "capstone",
+                            "NameProperty": "custom_team_name",
+                            "IdProperty": "custom_team_id"
+                        }
+                    ]
+                }
+            }
+        ]
+    },
     "NativeAppSettings": {
         "AppDownloadLink": "https://about.mattermost.com/downloads/",
         "AndroidAppDownloadLink": "https://about.mattermost.com/mattermost-android-app/",
