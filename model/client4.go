@@ -409,6 +409,10 @@ func (c *Client4) GetTermsOfServiceRoute() string {
 	return "/terms_of_service"
 }
 
+func (c *Client4) GetSignupWithLTIRoute() string {
+	return "/lti/signup"
+}
+
 func (c *Client4) DoApiGet(url string, etag string) (*http.Response, *AppError) {
 	return c.DoApiRequest(http.MethodGet, c.ApiUrl+url, "", etag)
 }
@@ -3835,5 +3839,16 @@ func (c *Client4) CreateTermsOfService(text, userId string) (*TermsOfService, *R
 	} else {
 		defer closeBody(r)
 		return TermsOfServiceFromJson(r.Body), BuildResponse(r)
+	}
+}
+
+func (c *Client4) SignupLTIUser(password string) *Response {
+	url := c.GetSignupWithLTIRoute()
+
+	data := map[string]string{"password": password}
+	if r, err := c.DoApiPost(url, MapToJson(data)); err != nil {
+		return BuildErrorResponse(r, err)
+	} else {
+		return BuildResponse(r)
 	}
 }
