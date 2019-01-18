@@ -1,49 +1,25 @@
 package web
 
 import (
-	"net/http"
-
 	"github.com/mattermost/mattermost-server/mlog"
 	"github.com/mattermost/mattermost-server/model"
 	"github.com/mattermost/mattermost-server/utils"
+	"net/http"
 )
 
 func (w *Web) InitLti() {
-	w.MainRouter.Handle("/login/lti", w.NewHandler(loginWithLti)).Methods("POST")
+	w.MainRouter.Handle("/login/lti", w.NewHandler(loginWithLTI)).Methods("POST")
 }
 
-func loginWithLti(c *Context, w http.ResponseWriter, r *http.Request) {
+func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	if !c.App.Config().LTISettings.Enable {
 		mlog.Error("LTI login request when LTI is disabled in config.json")
-		c.Err = model.NewAppError("loginWithLti", "api.lti.login.app_error", nil, "", http.StatusNotImplemented)
+		c.Err = model.NewAppError("loginWithLti", "api.lti.login.error.lti_disabled", nil, "", http.StatusNotImplemented)
 		return
 	}
 
 	// Validate request
-	lmss := c.App.Config().LTISettings.GetKnownLMSs()
-	ltiConsumerKey := r.FormValue("oauth_consumer_key")
-	var ltiConsumerSecret string
-
-	for _, val := range lmss {
-		// TODO: Figure out a better way to find consumer secret for multiple LMSs
-		if lms, ok := val.(model.EdxLMSSettings); ok {
-			if lms.OAuth.ConsumerKey == ltiConsumerKey {
-				ltiConsumerSecret = lms.OAuth.ConsumerSecret
-				break
-			}
-		}
-	}
-
-	if ltiConsumerSecret == "" {
-		mlog.Error("Consumer secret not found for consumer key: " + ltiConsumerKey)
-		c.Err = model.NewAppError("loginWithLti", "api.lti.login.app_error", nil, "", http.StatusNotImplemented)
-		return
-	}
-
-	p := utils.NewProvider(ltiConsumerSecret, c.GetSiteURLHeader()+c.Path)
-	p.ConsumerKey = ltiConsumerKey
-	if ok, err := p.IsValid(r); err != nil || ok == false {
-		mlog.Error("Invalid LTI request: " + err.Error())
+	if !utils.ValidateLTIRequest(c.GetSiteURLHeader()+c.Path, c.App.Config().LTISettings.GetKnownLMSs(), r) {
 		c.Err = model.NewAppError("loginWithLti", "api.lti.login.app_error", nil, "", http.StatusNotImplemented)
 		return
 	}
