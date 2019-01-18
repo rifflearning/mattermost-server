@@ -3846,6 +3846,7 @@ func (c *Client4) SignupLTIUser(password string) *Response {
 	url := c.GetSignupWithLTIRoute()
 
 	data := map[string]string{"password": password}
+
 	if r, err := c.DoApiPost(url, MapToJson(data)); err != nil {
 		return BuildErrorResponse(r, err)
 	} else {

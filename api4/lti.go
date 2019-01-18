@@ -6,11 +6,12 @@ package api4
 import (
 	"encoding/base64"
 	"encoding/json"
+	"net/http"
+	"net/url"
+
 	"github.com/mattermost/mattermost-server/mlog"
 	"github.com/mattermost/mattermost-server/model"
 	"github.com/mattermost/mattermost-server/utils"
-	"net/http"
-	"net/url"
 )
 
 func (api *API) initLTI() {
