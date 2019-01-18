@@ -1,7 +1,9 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/mattermost/mattermost-server/mlog"
 	"github.com/mattermost/mattermost-server/model"
@@ -13,6 +15,15 @@ func (w *Web) InitLti() {
 }
 
 func loginWithLti(c *Context, w http.ResponseWriter, r *http.Request) {
+	mlog.Debug("Received an LTI Login request")
+
+	r.ParseForm()
+	mlog.Debug("LTI Launch Data is: ")
+	for k, v := range r.Form {
+		mlog.Debug(fmt.Sprintf("[%s: %s]", k, v[0]))
+	}
+
+	mlog.Debug("Testing whether LTI is enabled: " + strconv.FormatBool(c.App.Config().LTISettings.Enable))
 	if !c.App.Config().LTISettings.Enable {
 		mlog.Error("LTI login request when LTI is disabled in config.json")
 		c.Err = model.NewAppError("loginWithLti", "api.lti.login.app_error", nil, "", http.StatusNotImplemented)
@@ -20,6 +31,7 @@ func loginWithLti(c *Context, w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate request
+	mlog.Debug("Validating LTI request")
 	lmss := c.App.Config().LTISettings.GetKnownLMSs()
 	ltiConsumerKey := r.FormValue("oauth_consumer_key")
 	var ltiConsumerSecret string
@@ -48,5 +60,6 @@ func loginWithLti(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	mlog.Debug("Redirecting to the LTI signup page")
 	http.Redirect(w, r, c.GetSiteURLHeader()+"/signup_lti", http.StatusFound)
 }
