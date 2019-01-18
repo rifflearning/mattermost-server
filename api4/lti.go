@@ -26,7 +26,6 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	cookie, err := r.Cookie("MMLTIAUTHDATA")
 	if err != nil {
 		mlog.Error("Could't extract LTI auth data cookie: " + err.Error())
@@ -59,12 +58,12 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 
 	// create user
 	user := &model.User{
-		Email: ltiLaunchData["lis_person_contact_email_primary"],
-		Username: ltiLaunchData["lis_person_sourcedid"],
+		Email:     ltiLaunchData["lis_person_contact_email_primary"],
+		Username:  ltiLaunchData["lis_person_sourcedid"],
 		FirstName: ltiLaunchData["lis_person_name_given"],
-		LastName: ltiLaunchData["lis_person_name_family"],
-		Position: ltiLaunchData["roles"],
-		Password: props["password"],
+		LastName:  ltiLaunchData["lis_person_name_family"],
+		Position:  ltiLaunchData["roles"],
+		Password:  props["password"],
 		Props: model.StringMap{
 			"lti_user_id": ltiLaunchData["custom_user_id"],
 		},
@@ -81,7 +80,6 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 }
-
 
 func buildLTIFormRequest(ltiLaunchData map[string]string) *http.Request {
 	request := &http.Request{}
