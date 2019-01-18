@@ -21,8 +21,6 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"fmt"
-	"github.com/mattermost/mattermost-server/mlog"
-	"github.com/mattermost/mattermost-server/model"
 	"net/http"
 	"net/url"
 	"sort"
@@ -30,6 +28,9 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
+
+	"github.com/mattermost/mattermost-server/mlog"
+	"github.com/mattermost/mattermost-server/model"
 )
 
 const (
@@ -302,4 +303,3 @@ func ValidateLTIRequest(url string, lmss []interface{}, r *http.Request) bool {
 
 	return true
 }
-
