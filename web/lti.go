@@ -1,20 +1,23 @@
+// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
+// See License.txt for license information.
+
 package web
 
 import (
 	"fmt"
-	"net/http"
 	"strconv"
 
 	"github.com/mattermost/mattermost-server/mlog"
 	"github.com/mattermost/mattermost-server/model"
 	"github.com/mattermost/mattermost-server/utils"
+	"net/http"
 )
 
 func (w *Web) InitLti() {
-	w.MainRouter.Handle("/login/lti", w.NewHandler(loginWithLti)).Methods("POST")
+	w.MainRouter.Handle("/login/lti", w.NewHandler(loginWithLTI)).Methods("POST")
 }
 
-func loginWithLti(c *Context, w http.ResponseWriter, r *http.Request) {
+func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	mlog.Debug("Received an LTI Login request")
 
 	r.ParseForm()
@@ -26,7 +29,7 @@ func loginWithLti(c *Context, w http.ResponseWriter, r *http.Request) {
 	mlog.Debug("Testing whether LTI is enabled: " + strconv.FormatBool(c.App.Config().LTISettings.Enable))
 	if !c.App.Config().LTISettings.Enable {
 		mlog.Error("LTI login request when LTI is disabled in config.json")
-		c.Err = model.NewAppError("loginWithLti", "api.lti.login.app_error", nil, "", http.StatusNotImplemented)
+		c.Err = model.NewAppError("loginWithLti", "api.lti.login.error.lti_disabled", nil, "", http.StatusNotImplemented)
 		return
 	}
 

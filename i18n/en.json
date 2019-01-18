@@ -1209,6 +1209,10 @@
     "translation": "There was an error with your login credentials. Please try again or contact your system administrator."
   },
   {
+    "id": "api.lti.signup.app_error",
+    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-{{.ErrorCode}}"
+  },
+  {
     "id": "api.oauth.allow_oauth.redirect_callback.app_error",
     "translation": "invalid_request: Supplied redirect_uri did not match registered callback_url"
   },
