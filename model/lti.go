@@ -1,3 +1,6 @@
+// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
+// See License.txt for license information.
+
 package model
 
 import (
@@ -10,6 +13,8 @@ const (
 	LMS_TYPE_FIELD = "Type"
 
 	LMS_TYPE_EDX = "edx"
+
+	LTI_LAUNCH_DATA_COOKIE = "MMLTILAUNCHDATA"
 )
 
 type LMSOAuthSettings struct {

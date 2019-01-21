@@ -28,6 +28,9 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
+
+	"github.com/mattermost/mattermost-server/mlog"
+	"github.com/mattermost/mattermost-server/model"
 )
 
 const (
@@ -270,4 +273,35 @@ func nonce() string {
 		atomic.CompareAndSwapUint64(&nonceCounter, 1, n)
 	}
 	return strconv.FormatUint(n, 16)
+}
+
+// ValidateLTIRequest is used to validate an LTI request by iterating through known lmss
+// to find the consumer secret for consumer key and using that to match oauth signature
+func ValidateLTIRequest(url string, lmss []interface{}, r *http.Request) bool {
+	ltiConsumerKey := r.FormValue("oauth_consumer_key")
+	var ltiConsumerSecret string
+
+	for _, val := range lmss {
+		// TODO: Figure out a better way to find consumer secret for multiple LMSs
+		if lms, ok := val.(model.EdxLMSSettings); ok {
+			if lms.OAuth.ConsumerKey == ltiConsumerKey {
+				ltiConsumerSecret = lms.OAuth.ConsumerSecret
+				break
+			}
+		}
+	}
+
+	if ltiConsumerSecret == "" {
+		mlog.Error("Consumer secret not found for consumer key: " + ltiConsumerKey)
+		return false
+	}
+
+	p := NewProvider(ltiConsumerSecret, url)
+	p.ConsumerKey = ltiConsumerKey
+	if ok, err := p.IsValid(r); err != nil || ok == false {
+		mlog.Error("Invalid LTI request: " + err.Error())
+		return false
+	}
+
+	return true
 }
