@@ -5,8 +5,8 @@ package model
 
 import (
 	"encoding/json"
-
 	"github.com/mattermost/mattermost-server/mlog"
+	"net/http"
 )
 
 const (
@@ -22,26 +22,11 @@ type LMSOAuthSettings struct {
 	ConsumerSecret string
 }
 
-type LMSSettings struct {
-	Name  string
-	Type  string
-	OAuth LMSOAuthSettings
-}
-
-type EdxChannel struct {
-	CourseType   string
-	NameProperty string
-	IDProperty   string
-}
-
-type EdxUserChannelsSettings struct {
-	Type        string
-	ChannelList []EdxChannel
-}
-
-type EdxLMSSettings struct {
-	LMSSettings
-	UserChannels EdxUserChannelsSettings
+type LMS interface {
+	GetName() string
+	GetType() string
+	GetOAuth() LMSOAuthSettings
+	ValidateLTIRequest(url string, request *http.Request) bool
 }
 
 type LTISettings struct {
@@ -50,22 +35,35 @@ type LTISettings struct {
 }
 
 // GetKnownLMSs can be used to extract a slice of known LMSs from LTI settings
-func (l *LTISettings) GetKnownLMSs() []interface{} {
-	var ret []interface{}
+func (l *LTISettings) GetKnownLMSs() []LMS {
+	var ret []LMS
+
 	for _, lms := range l.LMSs {
-		enc, err := json.Marshal(lms)
+		bytes, err := json.Marshal(lms)
 		if err != nil {
 			mlog.Error("Error in json.Marshal: " + err.Error())
 			continue
 		}
+
 		switch lms.(map[string]interface{})[LMS_TYPE_FIELD].(string) {
 		case LMS_TYPE_EDX:
-			var decodedEdx EdxLMSSettings
-			if json.Unmarshal(enc, &decodedEdx) == nil {
-				ret = append(ret, decodedEdx)
-				continue
+			var decodedEdx EdxLMS
+			if json.Unmarshal(bytes, &decodedEdx) == nil {
+				ret = append(ret, &decodedEdx)
 			}
 		}
 	}
 	return ret
+}
+
+func baseValidateLTIRequest(consumerSecret, consumerKey, url string, request *http.Request) bool {
+	p := NewProvider(consumerSecret, url)
+	p.ConsumerKey = consumerKey
+
+	if ok, err := p.IsValid(request); err != nil || ok == false {
+		mlog.Error("Invalid LTI request: " + err.Error())
+		return false
+	}
+
+	return true
 }

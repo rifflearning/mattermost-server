@@ -1,7 +1,7 @@
 // Copyright (c) 2017-present Mattermost, Inc. All Rights Reserved.
 // See License.txt for license information.
 
-package utils
+package model
 
 // LTI Tools from: https://github.com/jordic/lti
 // OAuth Tools from: github.com/daemonl/go_oauth
@@ -275,8 +275,6 @@ func nonce() string {
 	return strconv.FormatUint(n, 16)
 }
 
-// ValidateLTIRequest is used to validate an LTI request by iterating through known lmss
-// to find the consumer secret for consumer key and using that to match oauth signature
 func ValidateLTIRequest(url string, lmss []interface{}, r *http.Request) bool {
 	ltiConsumerKey := r.FormValue("oauth_consumer_key")
 	var ltiConsumerSecret string
