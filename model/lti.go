@@ -13,6 +13,8 @@ const (
 	LMS_TYPE_FIELD = "Type"
 
 	LMS_TYPE_EDX = "edx"
+
+	LTI_LAUNCH_DATA_COOKIE = "MMLTILAUNCHDATA"
 )
 
 type LMSOAuthSettings struct {

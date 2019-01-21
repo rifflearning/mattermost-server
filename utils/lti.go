@@ -275,6 +275,8 @@ func nonce() string {
 	return strconv.FormatUint(n, 16)
 }
 
+// ValidateLTIRequest is used to validate an LTI request by iterating through known lmss
+// to find the consumer secret for consumer key and using that to match oauth signature
 func ValidateLTIRequest(url string, lmss []interface{}, r *http.Request) bool {
 	ltiConsumerKey := r.FormValue("oauth_consumer_key")
 	var ltiConsumerSecret string
