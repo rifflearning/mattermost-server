@@ -1,3 +1,6 @@
+// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
+// See License.txt for license information.
+
 package web
 
 import (
@@ -12,10 +15,6 @@ import (
 	"github.com/mattermost/mattermost-server/utils"
 )
 
-const (
-	LTI_DATA_COOKIE = "MMLTIDATA"
-)
-
 func (w *Web) InitLti() {
 	w.MainRouter.Handle("/login/lti", w.NewHandler(loginWithLti)).Methods("POST")
 }
@@ -27,8 +26,7 @@ func loginWithLti(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	valid := isRequestValid(c, r)
-	if !valid {
+	if ok := utils.ValidateLTIRequest(c.GetSiteURLHeader()+c.Path, c.App.Config().LTISettings.GetKnownLMSs(), r); !ok {
 		c.Err = model.NewAppError("loginWithLti", "api.lti.login.app_error", nil, "", http.StatusNotImplemented)
 		return
 	}
@@ -36,36 +34,6 @@ func loginWithLti(c *Context, w http.ResponseWriter, r *http.Request) {
 	setLTIDataCookie(c, w, r)
 
 	http.Redirect(w, r, c.GetSiteURLHeader()+"/signup_lti", http.StatusFound)
-}
-
-func isRequestValid(c *Context, r *http.Request) bool {
-	lmss := c.App.Config().LTISettings.GetKnownLMSs()
-	ltiConsumerKey := r.FormValue("oauth_consumer_key")
-	var ltiConsumerSecret string
-
-	for _, val := range lmss {
-		// TODO: Figure out a better way to find consumer secret for multiple LMSs
-		if lms, ok := val.(model.EdxLMSSettings); ok {
-			if lms.OAuth.ConsumerKey == ltiConsumerKey {
-				ltiConsumerSecret = lms.OAuth.ConsumerSecret
-				break
-			}
-		}
-	}
-
-	if ltiConsumerSecret == "" {
-		mlog.Error("Consumer secret not found for consumer key: " + ltiConsumerKey)
-		return false
-	}
-
-	p := utils.NewProvider(ltiConsumerSecret, c.GetSiteURLHeader()+c.Path)
-	p.ConsumerKey = ltiConsumerKey
-	if ok, err := p.IsValid(r); err != nil || ok == false {
-		mlog.Error("Invalid LTI request: " + err.Error())
-		return false
-	}
-
-	return true
 }
 
 func encodeLTIRequest(v url.Values) string {
@@ -90,7 +58,7 @@ func setLTIDataCookie(c *Context, w http.ResponseWriter, r *http.Request) {
 	maxAge := 600 // 10 minutes
 	expiresAt := time.Unix(model.GetMillis()/1000+int64(maxAge), 0)
 	cookie := &http.Cookie{
-		Name:     LTI_DATA_COOKIE,
+		Name:     model.LTI_LAUNCH_DATA_COOKIE,
 		Value:    encodeLTIRequest(r.Form),
 		Path:     "/",
 		MaxAge:   maxAge,
