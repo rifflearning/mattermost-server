@@ -6,8 +6,10 @@ package web
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/mattermost/mattermost-server/mlog"
@@ -20,12 +22,22 @@ func (w *Web) InitLti() {
 }
 
 func loginWithLti(c *Context, w http.ResponseWriter, r *http.Request) {
+	mlog.Debug("Received an LTI Login request")
+
+	r.ParseForm()
+	mlog.Debug("LTI Launch Data is: ")
+	for k, v := range r.Form {
+		mlog.Debug(fmt.Sprintf("[%s: %s]", k, v[0]))
+	}
+
+	mlog.Debug("Testing whether LTI is enabled: " + strconv.FormatBool(c.App.Config().LTISettings.Enable))
 	if !c.App.Config().LTISettings.Enable {
 		mlog.Error("LTI login request when LTI is disabled in config.json")
 		c.Err = model.NewAppError("loginWithLti", "api.lti.login.app_error", nil, "", http.StatusNotImplemented)
 		return
 	}
 
+	mlog.Debug("Validating LTI request")
 	if ok := utils.ValidateLTIRequest(c.GetSiteURLHeader()+c.Path, c.App.Config().LTISettings.GetKnownLMSs(), r); !ok {
 		c.Err = model.NewAppError("loginWithLti", "api.lti.login.app_error", nil, "", http.StatusNotImplemented)
 		return
@@ -33,6 +45,7 @@ func loginWithLti(c *Context, w http.ResponseWriter, r *http.Request) {
 
 	setLTIDataCookie(c, w, r)
 
+	mlog.Debug("Redirecting to the LTI signup page")
 	http.Redirect(w, r, c.GetSiteURLHeader()+"/signup_lti", http.StatusFound)
 }
 
