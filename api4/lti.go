@@ -26,7 +26,7 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie(model.LTI_LAUNCH_DATA_COOKIE)
 	if err != nil {
 		mlog.Error("Could't extract LTI auth data cookie: " + err.Error())
-		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.app_error.lti_data_cookie_not_found", nil, "", http.StatusBadRequest)
+		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.app_error.lti_data.cookie_not_found", nil, "", http.StatusBadRequest)
 		return
 	}
 

@@ -63,7 +63,7 @@ func (e *EdxLMS) BuildUser(launchData map[string]string, password string) *User 
 		Position:  launchData[launchDataPositionKey],
 		Password:  password,
 		Props: StringMap{
-			"lti_user_id": launchData[launchDataLTIUserIdKey],
+			LTI_USER_ID_PROP_KEY : launchData[launchDataLTIUserIdKey],
 		},
 	}
 }
