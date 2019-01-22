@@ -4,13 +4,16 @@
 package web
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/url"
 	"strconv"
+	"time"
 
 	"github.com/mattermost/mattermost-server/mlog"
 	"github.com/mattermost/mattermost-server/model"
-	"github.com/mattermost/mattermost-server/utils"
-	"net/http"
 )
 
 func (w *Web) InitLti() {
@@ -20,7 +23,12 @@ func (w *Web) InitLti() {
 func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	mlog.Debug("Received an LTI Login request")
 
-	r.ParseForm()
+	if err := r.ParseForm(); err != nil {
+		mlog.Error("Error occurred while parsing submited form: " + err.Error())
+		c.Err = model.NewAppError("loginWithLti", "api.lti.login.app_error", nil, "", http.StatusBadRequest)
+	}
+
+	// printing launch data for debugging purpose
 	mlog.Debug("LTI Launch Data is: ")
 	for k, v := range r.Form {
 		mlog.Debug(fmt.Sprintf("[%s: %s]", k, v[0]))
@@ -33,36 +41,51 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Validate request
 	mlog.Debug("Validating LTI request")
-	lmss := c.App.Config().LTISettings.GetKnownLMSs()
-	ltiConsumerKey := r.FormValue("oauth_consumer_key")
-	var ltiConsumerSecret string
+	consumerKey := r.FormValue("oauth_consumer_key")
+	lms := c.App.GetLMSToUse(consumerKey)
 
-	for _, val := range lmss {
-		// TODO: Figure out a better way to find consumer secret for multiple LMSs
-		if lms, ok := val.(model.EdxLMSSettings); ok {
-			if lms.OAuth.ConsumerKey == ltiConsumerKey {
-				ltiConsumerSecret = lms.OAuth.ConsumerSecret
-				break
-			}
-		}
-	}
-
-	if ltiConsumerSecret == "" {
-		mlog.Error("Consumer secret not found for consumer key: " + ltiConsumerKey)
+	if ok := lms.ValidateLTIRequest(c.GetSiteURLHeader()+c.Path, r); !ok {
 		c.Err = model.NewAppError("loginWithLti", "api.lti.login.app_error", nil, "", http.StatusNotImplemented)
 		return
 	}
 
-	p := utils.NewProvider(ltiConsumerSecret, c.GetSiteURLHeader()+c.Path)
-	p.ConsumerKey = ltiConsumerKey
-	if ok, err := p.IsValid(r); err != nil || ok == false {
-		mlog.Error("Invalid LTI request: " + err.Error())
-		c.Err = model.NewAppError("loginWithLti", "api.lti.login.app_error", nil, "", http.StatusNotImplemented)
-		return
-	}
+	setLTIDataCookie(c, w, r)
 
 	mlog.Debug("Redirecting to the LTI signup page")
 	http.Redirect(w, r, c.GetSiteURLHeader()+"/signup_lti", http.StatusFound)
+}
+
+func encodeLTIRequest(v url.Values) string {
+	if v == nil {
+		return ""
+	}
+	form := make(map[string]string)
+	for key, value := range v {
+		form[key] = value[0]
+	}
+	res, err := json.Marshal(form)
+	if err != nil {
+		mlog.Error("Error in json.Marshal: " + err.Error())
+		return ""
+	}
+
+	return base64.StdEncoding.EncodeToString([]byte(string(res)))
+}
+
+func setLTIDataCookie(c *Context, w http.ResponseWriter, r *http.Request) {
+	r.ParseForm() // to populate r.Form
+	maxAge := 600 // 10 minutes
+	expiresAt := time.Unix(model.GetMillis()/1000+int64(maxAge), 0)
+	cookie := &http.Cookie{
+		Name:     model.LTI_LAUNCH_DATA_COOKIE,
+		Value:    encodeLTIRequest(r.Form),
+		Path:     "/",
+		MaxAge:   maxAge,
+		Expires:  expiresAt,
+		Domain:   c.App.GetCookieDomain(),
+		HttpOnly: false,
+	}
+
+	http.SetCookie(w, cookie)
 }
