@@ -7,6 +7,15 @@ import (
 	"net/http"
 )
 
+const (
+	launchDataEmailKey     = "lis_person_contact_email_primary"
+	launchDataUsernameKey  = "lis_person_sourcedid"
+	launchDataFirstNameKey = "lis_person_name_given"
+	launchDataLastNameKey  = "lis_person_name_family"
+	launchDataPositionKey  = "roles"
+	launchDataLTIUserIdKey = "custom_user_id"
+)
+
 type EdxChannel struct {
 	CourseType   string
 	NameProperty string
@@ -47,14 +56,14 @@ func (e *EdxLMS) ValidateLTIRequest(url string, request *http.Request) bool {
 
 func (e *EdxLMS) BuildUser(launchData map[string]string, password string) *User {
 	return &User{
-		Email:     launchData["lis_person_contact_email_primary"],
-		Username:  launchData["lis_person_sourcedid"],
-		FirstName: launchData["lis_person_name_given"],
-		LastName:  launchData["lis_person_name_family"],
-		Position:  launchData["roles"],
+		Email:     launchData[launchDataEmailKey],
+		Username:  launchData[launchDataUsernameKey],
+		FirstName: launchData[launchDataFirstNameKey],
+		LastName:  launchData[launchDataLastNameKey],
+		Position:  launchData[launchDataPositionKey],
 		Password:  password,
 		Props: StringMap{
-			"lti_user_id": launchData["custom_user_id"],
+			"lti_user_id": launchData[launchDataLTIUserIdKey],
 		},
 	}
 }

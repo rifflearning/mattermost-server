@@ -240,7 +240,7 @@ func Init(a *app.App, root *mux.Router) *API {
 	api.InitScheme()
 	api.InitImage()
 	api.InitTermsOfService()
-	api.initLTI()
+	api.InitLTI()
 
 	root.Handle("/api/v4/{anything:.*}", http.HandlerFunc(api.Handle404))
 
