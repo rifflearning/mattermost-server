@@ -6,11 +6,10 @@ package api4
 import (
 	"encoding/base64"
 	"encoding/json"
-	"net/http"
-	"net/url"
-
 	"github.com/mattermost/mattermost-server/mlog"
 	"github.com/mattermost/mattermost-server/model"
+	"net/http"
+	"net/url"
 )
 
 func (api *API) initLTI() {
@@ -49,7 +48,7 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	consumerKey := ltiLaunchData["oauth_consumer_key"]
 	lms := c.App.GetLMSToUse(consumerKey)
 
-	if !lms.ValidateLTIRequest(c.GetSiteURLHeader()+c.Path, addLaunchDataToForm(ltiLaunchData, r)) {
+	if !lms.ValidateLTIRequest(c.GetSiteURLHeader()+"/login/lti", addLaunchDataToForm(ltiLaunchData, r)) {
 		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.app_error.lti_launch_data.validation_failed", nil, "", http.StatusBadRequest)
 		return
 	}
