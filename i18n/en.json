@@ -1209,11 +1209,15 @@
     "translation": "There was an error with your login credentials. Please try again or contact your system administrator."
   },
   {
+    "id": "api.lti.login.cookie.set_error",
+    "translation": "There was an error with your login credentials. Please try again or contact your system administrator. Error code LTI-8"
+  },
+  {
     "id": "api.lti.signup.app_error.lti_disabled",
     "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-1"
   },
   {
-    "id": "api.lti.signup.app_error.lti_data_cookie_not_found",
+    "id": "api.lti.signup.app_error.lti_data.cookie_not_found",
     "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-2"
   },
   {
@@ -1231,6 +1235,10 @@
   {
     "id": "api.lti.signup.app_error.create_user.failed",
     "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-6"
+  },
+  {
+    "id": "api.lti.signup.app_error.form.parse_failed",
+    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-7"
   },
   {
     "id": "api.oauth.allow_oauth.redirect_callback.app_error",

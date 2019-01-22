@@ -24,8 +24,9 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	mlog.Debug("Received an LTI Login request")
 
 	if err := r.ParseForm(); err != nil {
-		mlog.Error("Error occurred while parsing submited form: " + err.Error())
-		c.Err = model.NewAppError("loginWithLti", "api.lti.login.app_error", nil, "", http.StatusBadRequest)
+		mlog.Error("Error occurred while parsing submitted form: " + err.Error())
+		c.Err = model.NewAppError("loginWithLTI", "api.lti.signup.app_error.form.parse_failed", nil, "", http.StatusBadRequest)
+		return
 	}
 
 	// printing launch data for debugging purpose
@@ -37,7 +38,7 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	mlog.Debug("Testing whether LTI is enabled: " + strconv.FormatBool(c.App.Config().LTISettings.Enable))
 	if !c.App.Config().LTISettings.Enable {
 		mlog.Error("LTI login request when LTI is disabled in config.json")
-		c.Err = model.NewAppError("loginWithLti", "api.lti.login.error.lti_disabled", nil, "", http.StatusNotImplemented)
+		c.Err = model.NewAppError("loginWithLTI", "api.lti.signup.app_error.lti_disabled", nil, "", http.StatusNotImplemented)
 		return
 	}
 
@@ -46,11 +47,15 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	lms := c.App.GetLMSToUse(consumerKey)
 
 	if ok := lms.ValidateLTIRequest(c.GetSiteURLHeader()+c.Path, r); !ok {
-		c.Err = model.NewAppError("loginWithLti", "api.lti.login.app_error", nil, "", http.StatusNotImplemented)
+		c.Err = model.NewAppError("loginWithLTI", "api.lti.login.app_error", nil, "", http.StatusNotImplemented)
 		return
 	}
 
-	setLTIDataCookie(c, w, r)
+	if err := setLTIDataCookie(c, w, r); err != nil {
+		mlog.Error("Error occurred while setting LTI cookies: " + err.Error())
+		c.Err = model.NewAppError("loginWithLTI", "api.lti.login.cookie.set_error", nil, "", http.StatusInternalServerError)
+		return
+	}
 
 	mlog.Debug("Redirecting to the LTI signup page")
 	http.Redirect(w, r, c.GetSiteURLHeader()+"/signup_lti", http.StatusFound)
@@ -73,8 +78,11 @@ func encodeLTIRequest(v url.Values) string {
 	return base64.StdEncoding.EncodeToString([]byte(string(res)))
 }
 
-func setLTIDataCookie(c *Context, w http.ResponseWriter, r *http.Request) {
-	r.ParseForm() // to populate r.Form
+func setLTIDataCookie(c *Context, w http.ResponseWriter, r *http.Request) error {
+	if err := r.ParseForm(); err != nil {
+		return err
+	}
+
 	maxAge := 600 // 10 minutes
 	expiresAt := time.Unix(model.GetMillis()/1000+int64(maxAge), 0)
 	cookie := &http.Cookie{
@@ -88,4 +96,5 @@ func setLTIDataCookie(c *Context, w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, cookie)
+	return nil
 }
