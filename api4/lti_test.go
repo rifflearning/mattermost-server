@@ -1,3 +1,6 @@
+// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
+// See License.txt for license information.
+
 package api4
 
 import (
@@ -14,7 +17,7 @@ func TestSignupWithLTI(t *testing.T) {
 	Client := th.Client
 
 	launchData := map[string]string{
-		"oauth_consumer_key":               "canvas-emeritus_5863",
+		"oauth_consumer_key":               "edx-appsembler-test_5345",
 		"oauth_signature_method":           "HMAC-SHA1",
 		"oauth_version":                    "1.0",
 		"context_id":                       "context-id",
@@ -33,13 +36,13 @@ func TestSignupWithLTI(t *testing.T) {
 		"lti_version":                      "LTI-1p0",
 		"roles":                            "Instructor",
 		"user_id":                          "user-id",
-		"oauth_signature":                  "A1YyNs3Gdea/6g+Q2MpPkUfQB2I=",
+		"oauth_signature":                  "UjaH+n/SxA4DvbMZPNxpLKKRga4=",
 	}
 	bytes, err := json.Marshal(launchData)
 	assert.Nil(t, err)
 
 	cookie := base64.StdEncoding.EncodeToString(bytes)
-	Client.HttpHeader["Cookie"] = "MMLTIAUTHDATA=" + cookie
+	Client.HttpHeader["Cookie"] = "MMLTILAUNCHDATA=" + cookie
 
 	resp := Client.SignupLTIUser("pa$$word")
 
