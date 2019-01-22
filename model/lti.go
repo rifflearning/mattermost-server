@@ -27,6 +27,7 @@ type LMS interface {
 	GetType() string
 	GetOAuth() LMSOAuthSettings
 	ValidateLTIRequest(url string, request *http.Request) bool
+	BuildUser(launchData map[string]string, password string) *User
 }
 
 type LTISettings struct {

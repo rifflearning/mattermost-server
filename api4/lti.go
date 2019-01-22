@@ -11,7 +11,6 @@ import (
 
 	"github.com/mattermost/mattermost-server/mlog"
 	"github.com/mattermost/mattermost-server/model"
-	"github.com/mattermost/mattermost-server/utils"
 )
 
 func (api *API) initLTI() {
@@ -21,13 +20,11 @@ func (api *API) initLTI() {
 func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	if !c.App.Config().LTISettings.Enable {
 		mlog.Error("LTI signup request when LTI is disabled")
-		// TODO: add error message in en.json
-		// TODO: decide the correct error code here
 		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.app_error.lti_disabled", nil, "", http.StatusNotImplemented)
 		return
 	}
 
-	cookie, err := r.Cookie("MMLTILAUNCHDATA")
+	cookie, err := r.Cookie(model.LTI_LAUNCH_DATA_COOKIE)
 	if err != nil {
 		mlog.Error("Could't extract LTI auth data cookie: " + err.Error())
 		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.app_error.lti_data_cookie_not_found", nil, "", http.StatusBadRequest)
@@ -49,30 +46,22 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	}
 
 	// validate launch data
-	ltiLaunchDataRequest := buildLTIFormRequest(ltiLaunchData)
-	if !utils.ValidateLTIRequest(c.GetSiteURLHeader()+c.Path, c.App.Config().LTISettings.GetKnownLMSs(), ltiLaunchDataRequest) {
-		c.Err = model.NewAppError("loginWithLti", "api.lti.signup.app_error.lti_launch_data.validation_failed", nil, "", http.StatusBadRequest)
+	consumerKey := ltiLaunchData["oauth_consumer_key"]
+	lms := c.App.GetLMSToUse(consumerKey)
+
+	if !lms.ValidateLTIRequest(c.GetSiteURLHeader()+c.Path, addLaunchDataToForm(ltiLaunchData, r)) {
+		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.app_error.lti_launch_data.validation_failed", nil, "", http.StatusBadRequest)
 		return
 	}
 
-	props := model.MapFromJson(r.Body)
-
 	// create user
-	user := &model.User{
-		Email:     ltiLaunchData["lis_person_contact_email_primary"],
-		Username:  ltiLaunchData["lis_person_sourcedid"],
-		FirstName: ltiLaunchData["lis_person_name_given"],
-		LastName:  ltiLaunchData["lis_person_name_family"],
-		Position:  ltiLaunchData["roles"],
-		Password:  props["password"],
-		Props: model.StringMap{
-			"lti_user_id": ltiLaunchData["custom_user_id"],
-		},
-	}
+	props := model.MapFromJson(r.Body)
+	user := lms.BuildUser(ltiLaunchData, props["password"])
+	user, appErr := c.App.CreateUser(user)
 
-	if _, appErr := c.App.CreateUser(user); appErr != nil {
-		mlog.Error("Error occurred while creating new user: " + appErr.Error())
-		c.Err = model.NewAppError("loginWithLti", "api.lti.signup.app_error.create_user.failed", nil, appErr.Error(), appErr.StatusCode)
+	if appErr != nil {
+		mlog.Error("Error occurred while creating LTI user: " + appErr.Error())
+		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.create_user_failed", nil, appErr.Error(), appErr.StatusCode)
 		return
 	}
 
@@ -82,8 +71,7 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func buildLTIFormRequest(ltiLaunchData map[string]string) *http.Request {
-	request := &http.Request{}
+func addLaunchDataToForm(ltiLaunchData map[string]string, request *http.Request) *http.Request {
 	request.Form = url.Values{}
 
 	for k, v := range ltiLaunchData {

@@ -41,3 +41,17 @@ func (e *EdxLMS) GetValidateLTIRequest() bool {
 func (e *EdxLMS) ValidateLTIRequest(url string, request *http.Request) bool {
 	return baseValidateLTIRequest(e.OAuth.ConsumerSecret, e.OAuth.ConsumerKey, url, request)
 }
+
+func (e *EdxLMS) BuildUser(launchData map[string]string, password string) *User {
+	return &User{
+		Email:     launchData["lis_person_contact_email_primary"],
+		Username:  launchData["lis_person_sourcedid"],
+		FirstName: launchData["lis_person_name_given"],
+		LastName:  launchData["lis_person_name_family"],
+		Position:  launchData["roles"],
+		Password:  password,
+		Props: StringMap{
+			"lti_user_id": launchData["custom_user_id"],
+		},
+	}
+}
