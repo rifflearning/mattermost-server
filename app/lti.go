@@ -1,3 +1,6 @@
+// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
+// See License.txt for license information.
+
 package app
 
 import (
@@ -6,7 +9,7 @@ import (
 
 func (a *App) GetLMSToUse(consumerKey string) model.LMS {
 	for _, lms := range a.Config().LTISettings.GetKnownLMSs() {
-		if lms.GetOAuth().ConsumerKey == consumerKey  {
+		if lms.GetOAuth().ConsumerKey == consumerKey {
 			return lms
 		}
 	}

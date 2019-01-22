@@ -1,3 +1,6 @@
+// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
+// See License.txt for license information.
+
 package model
 
 import (
@@ -16,9 +19,9 @@ type EdxUserChannelsSettings struct {
 }
 
 type EdxLMS struct {
-	Name  string
-	Type  string
-	OAuth LMSOAuthSettings
+	Name         string
+	Type         string
+	OAuth        LMSOAuthSettings
 	UserChannels EdxUserChannelsSettings
 }
 
