@@ -15,6 +15,8 @@ const (
 	LMS_TYPE_EDX = "edx"
 
 	LTI_LAUNCH_DATA_COOKIE = "MMLTILAUNCHDATA"
+
+	LTI_USER_ID_PROP_KEY = "lti_user_id"
 )
 
 type LMSOAuthSettings struct {
@@ -27,6 +29,7 @@ type LMS interface {
 	GetType() string
 	GetOAuth() LMSOAuthSettings
 	ValidateLTIRequest(url string, request *http.Request) bool
+	BuildUser(launchData map[string]string, password string) *User
 }
 
 type LTISettings struct {
