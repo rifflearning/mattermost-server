@@ -12,7 +12,7 @@ import (
 	"net/url"
 )
 
-func (api *API) initLTI() {
+func (api *API) InitLTI() {
 	api.BaseRoutes.LTI.Handle("/signup", api.ApiHandler(signupWithLTI)).Methods("POST")
 }
 
@@ -67,7 +67,7 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	// TODO: create required channels here
 	// TODO: add user to required channels here
 
-	w.WriteHeader(http.StatusOK)
+	ReturnStatusOK(w)
 }
 
 func addLaunchDataToForm(ltiLaunchData map[string]string, request *http.Request) *http.Request {
