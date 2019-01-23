@@ -6,10 +6,11 @@ package api4
 import (
 	"encoding/base64"
 	"encoding/json"
-	"github.com/mattermost/mattermost-server/mlog"
-	"github.com/mattermost/mattermost-server/model"
 	"net/http"
 	"net/url"
+
+	"github.com/mattermost/mattermost-server/mlog"
+	"github.com/mattermost/mattermost-server/model"
 )
 
 func (api *API) InitLTI() {
@@ -19,28 +20,28 @@ func (api *API) InitLTI() {
 func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	if !c.App.Config().LTISettings.Enable {
 		mlog.Error("LTI signup request when LTI is disabled")
-		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.app_error.lti_disabled", nil, "", http.StatusNotImplemented)
+		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.disabled.app_error", nil, "", http.StatusNotImplemented)
 		return
 	}
 
 	cookie, err := r.Cookie(model.LTI_LAUNCH_DATA_COOKIE)
 	if err != nil {
 		mlog.Error("Could't extract LTI auth data cookie: " + err.Error())
-		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.app_error.lti_data.cookie_not_found", nil, "", http.StatusBadRequest)
+		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.cookie_missing.app_error", nil, "", http.StatusBadRequest)
 		return
 	}
 
 	data, err := base64.StdEncoding.DecodeString(cookie.Value)
 	if err != nil {
 		mlog.Error("Error occurred while decoding LTI launch data: " + err.Error())
-		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.app_error.lti_data.decoding_failed", nil, "", http.StatusBadRequest)
+		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.decoding.app_error", nil, "", http.StatusBadRequest)
 		return
 	}
 
 	ltiLaunchData := map[string]string{}
 	if err := json.Unmarshal(data, &ltiLaunchData); err != nil {
 		mlog.Error("Error occurred while unmarshaling LTI launch data: " + err.Error())
-		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.app_error.lti_data.unmarshaling_failed", nil, err.Error(), http.StatusBadRequest)
+		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.unmarshaling.app_error", nil, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -49,7 +50,7 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	lms := c.App.GetLMSToUse(consumerKey)
 
 	if !lms.ValidateLTIRequest(c.GetSiteURLHeader()+"/login/lti", addLaunchDataToForm(ltiLaunchData, r)) {
-		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.app_error.lti_launch_data.validation_failed", nil, "", http.StatusBadRequest)
+		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.validation.app_error", nil, "", http.StatusBadRequest)
 		return
 	}
 
