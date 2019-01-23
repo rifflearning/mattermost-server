@@ -31,8 +31,6 @@ type EdxDefaultChannel struct {
 	DisplayName string
 }
 
-type EdxDefaultChannelMapping map[string]EdxDefaultChannel
-
 type EdxTeamMapping [] struct {
 	ContextId string
 	TeamName  string
@@ -45,7 +43,7 @@ type EdxLMS struct {
 	Teams               EdxTeamMapping
 
 	PersonalChannels EdxPersonalChannels
-	DefaultChannels  EdxDefaultChannelMapping
+	DefaultChannels  map[string]EdxDefaultChannel
 }
 
 func (e *EdxLMS) GetName() string {
