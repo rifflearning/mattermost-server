@@ -328,55 +328,41 @@
     },
     "LTISettings": {
         "Enable": true,
-        "Lmss": [
-            {
-                "Name": "Emeritus",
-                "Type": "canvas",
-                "Oauth": {
-                    "ConsumerKey": "canvas-emeritus_5863",
-                    "ConsumerSecret": "emeritus secret"
-                },
-                "UserChannels": {
-                    "Type": "emeritus-group",
-                    "AuthorizationToken": "dummy~value",
-                    "ChannelList":
-                    [
-                        {
-                            "CourseType": "plg",
-                            "NameRegEx": "^riff_PLG_"
-                        },
-                        {
-                            "CourseType": "capstone",
-                            "NameRegEx": "^riff_Team_"
-                        }
-                    ]
-                }
+        "LMSs": {
+            "Emeritus": {
+
             },
-            {
-                "Name": "Appsembler",
+            "Appsembler": {
                 "Type": "edx",
-                "Oauth": {
-                    "ConsumerKey": "edx-appsembler-test_5345",
-                    "ConsumerSecret": "secret"
-                },
-                "UserChannels": {
+                "OAuthConsumerKey": "edx-appsembler-test_5345",
+                "OAuthConsumerSecret": "secret",
+                "Teams": [
+                    {
+                        "ContextId": "course-v1:appsembler-the-red+Riff+101",
+                        "TeamName": "riff-a"
+                    }
+                ],
+                "PersonalChannels": {
                     "Type": "custom-properties",
-                    "ChannelList":
-                    [
-                        {
-                            "CourseType": "plg",
-                            "NameProperty": "custom_cohort_name",
-                            "IdProperty": "custom_cohort_id"
+                    "ChannelList": {
+                        "plg": {
+                            "IdProperty": "custom_cohort_id",
+                            "NameProperty": "custom_team_name"
                         },
-                        {
-                            "CourseType": "capstone",
-                            "NameProperty": "custom_team_name",
-                            "IdProperty": "custom_team_id"
+                        "capstone": {
+                            "IdProperty": "custom_team_id",
+                            "NameProperty": "custom_team_name"
                         }
-                    ]
+                    }
+                },
+                "DefaultChannels": {
+                    "coding-help": {
+                        "Name": "coding-help",
+                        "DisplayName": "Coding Help"
+                    }
                 }
             }
-        ]
+        }
     },
     "NativeAppSettings": {
         "AppDownloadLink": "https://about.mattermost.com/downloads/",
