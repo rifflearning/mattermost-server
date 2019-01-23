@@ -42,13 +42,16 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		c.Err = model.NewAppError("loginWithLTI", "api.lti.login.parse.app_error", nil, "", http.StatusBadRequest)
 	}
 
-	mlog.Debug("Validating LTI request")
-	consumerKey := r.FormValue("oauth_consumer_key")
-	lms := c.App.GetLMSToUse(consumerKey)
+	mlog.Debug("LTI Signature Validation enabled: " +  strconv.FormatBool(c.App.Config().LTISettings.EnableSignatureValidation))
+	if c.App.Config().LTISettings.EnableSignatureValidation {
+		mlog.Debug("Validating LTI request")
+		consumerKey := r.FormValue("oauth_consumer_key")
+		lms := c.App.GetLMSToUse(consumerKey)
 
-	if !lms.ValidateLTIRequest(c.GetSiteURLHeader()+c.Path, r) {
-		c.Err = model.NewAppError("loginWithLTI", "api.lti.login.validation.app_error", nil, "", http.StatusBadRequest)
-		return
+		if !lms.ValidateLTIRequest(c.GetSiteURLHeader()+c.Path, r) {
+			c.Err = model.NewAppError("loginWithLTI", "api.lti.login.validation.app_error", nil, "", http.StatusBadRequest)
+			return
+		}
 	}
 
 	encodedRequest, appError := encodeLTIRequest(r.Form)
