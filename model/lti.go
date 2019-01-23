@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	LMS_TYPE_FIELD = "Type"
+	LMS_TYPE_FIELD = "type"
 
 	LMS_TYPE_EDX = "edx"
 
@@ -27,14 +27,15 @@ type LMSOAuthSettings struct {
 type LMS interface {
 	GetName() string
 	GetType() string
-	GetOAuth() LMSOAuthSettings
+	GetOAuthConsumerKey() string
+	GetOAuthConsumerSecret() string
 	ValidateLTIRequest(url string, request *http.Request) bool
 	BuildUser(launchData map[string]string, password string) *User
 }
 
 type LTISettings struct {
 	Enable bool
-	LMSs   []interface{}
+	LMSs   map[string]interface{}
 }
 
 // GetKnownLMSs can be used to extract a slice of known LMSs from LTI settings

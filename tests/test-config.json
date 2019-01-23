@@ -71,7 +71,7 @@
         "MaxUsersPerTeam": 50,
         "EnableTeamCreation": true,
         "EnableUserCreation": true,
-        "EnableOpenServer": false,
+        "EnableOpenServer": true,
         "EnableUserDeactivation": false,
         "RestrictCreationToDomains": "",
         "EnableCustomBrand": false,
@@ -408,5 +408,41 @@
     },
     "TimezoneSettings": {
         "SupportedTimezonesPath": "timezones.json"
+    },
+    "LTISettings": {
+        "Enable": true,
+        "LMSs": {
+            "Emeritus": {
+
+            },
+            "Appsembler": {
+                "Type": "edx",
+                "OAuthConsumerKey": "edx-appsembler-test_5345",
+                "OAuthConsumerSecret": "secret",
+                "Teams": [
+                    {
+                        "ContextId": "course-v1:appsembler-the-red+Riff+101",
+                        "TeamName": "riff-a"
+                    }
+                ],
+                "PersonalChannels": {
+                    "Type": "custom-properties",
+                    "plg": {
+                        "IdProperty": "custom_cohort_id",
+                        "NameProperty": "custom_team_name"
+                    },
+                    "capstone": {
+                        "IdProperty": "custom_team_id",
+                        "NameProperty": "custom_team_name"
+                    }
+                },
+                "DefaultChannels": {
+                    "coding-help": {
+                        "Name": "coding-help",
+                        "DisplayName": "Coding Help"
+                    }
+                }
+            }
+        }
     }
 }

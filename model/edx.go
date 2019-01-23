@@ -17,33 +17,51 @@ const (
 )
 
 type EdxChannel struct {
-	CourseType   string
+	IdProperty   string
 	NameProperty string
-	IDProperty   string
 }
 
-type EdxUserChannelsSettings struct {
+type EdxPersonalChannels struct {
 	Type        string
-	ChannelList []EdxChannel
+	ChannelList map[string]EdxChannel
+}
+
+type EdxDefaultChannel struct {
+	Name        string
+	DisplayName string
+}
+
+type EdxDefaultChannelMapping map[string]EdxDefaultChannel
+
+type EdxTeamMapping [] struct {
+	ContextId    string
+	TeamName string
 }
 
 type EdxLMS struct {
-	Name         string
-	Type         string
-	OAuth        LMSOAuthSettings
-	UserChannels EdxUserChannelsSettings
+	Type                string
+	OAuthConsumerKey    string
+	OAuthConsumerSecret string
+	Teams               EdxTeamMapping
+
+	PersonalChannels EdxPersonalChannels
+	DefaultChannels  EdxDefaultChannelMapping
 }
 
 func (e *EdxLMS) GetName() string {
-	return e.Name
+	return "Appsembler"
 }
 
 func (e *EdxLMS) GetType() string {
 	return e.Type
 }
 
-func (e *EdxLMS) GetOAuth() LMSOAuthSettings {
-	return e.OAuth
+func (e *EdxLMS) GetOAuthConsumerKey() string {
+	return e.OAuthConsumerKey
+}
+
+func (e *EdxLMS) GetOAuthConsumerSecret() string {
+	return e.OAuthConsumerSecret
 }
 
 func (e *EdxLMS) GetValidateLTIRequest() bool {
@@ -51,7 +69,7 @@ func (e *EdxLMS) GetValidateLTIRequest() bool {
 }
 
 func (e *EdxLMS) ValidateLTIRequest(url string, request *http.Request) bool {
-	return baseValidateLTIRequest(e.OAuth.ConsumerSecret, e.OAuth.ConsumerKey, url, request)
+	return baseValidateLTIRequest(e.OAuthConsumerSecret, e.OAuthConsumerKey, url, request)
 }
 
 func (e *EdxLMS) BuildUser(launchData map[string]string, password string) *User {
@@ -63,7 +81,7 @@ func (e *EdxLMS) BuildUser(launchData map[string]string, password string) *User 
 		Position:  launchData[launchDataPositionKey],
 		Password:  password,
 		Props: StringMap{
-			LTI_USER_ID_PROP_KEY : launchData[launchDataLTIUserIdKey],
+			LTI_USER_ID_PROP_KEY: launchData[launchDataLTIUserIdKey],
 		},
 	}
 }

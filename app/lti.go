@@ -9,7 +9,7 @@ import (
 
 func (a *App) GetLMSToUse(consumerKey string) model.LMS {
 	for _, lms := range a.Config().LTISettings.GetKnownLMSs() {
-		if lms.GetOAuth().ConsumerKey == consumerKey {
+		if lms.GetOAuthConsumerKey() == consumerKey {
 			return lms
 		}
 	}
