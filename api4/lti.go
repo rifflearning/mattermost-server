@@ -49,7 +49,7 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	consumerKey := ltiLaunchData["oauth_consumer_key"]
 	lms := c.App.GetLMSToUse(consumerKey)
 
-	if !lms.ValidateLTIRequest(c.GetSiteURLHeader()+"/login/lti", addLaunchDataToForm(ltiLaunchData, r)) {
+	if c.App.Config().LTISettings.EnableSignatureValidation && !lms.ValidateLTIRequest(c.GetSiteURLHeader()+"/login/lti", addLaunchDataToForm(ltiLaunchData, r)) {
 		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.validation.app_error", nil, "", http.StatusBadRequest)
 		return
 	}
@@ -61,7 +61,7 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 
 	if appErr != nil {
 		mlog.Error("Error occurred while creating LTI user: " + appErr.Error())
-		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.create_user_failed", nil, appErr.Error(), appErr.StatusCode)
+		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.create_user.app_error", nil, appErr.Error(), appErr.StatusCode)
 		return
 	}
 

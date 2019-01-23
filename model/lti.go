@@ -5,8 +5,9 @@ package model
 
 import (
 	"encoding/json"
-	"github.com/mattermost/mattermost-server/mlog"
 	"net/http"
+
+	"github.com/mattermost/mattermost-server/mlog"
 )
 
 const (
@@ -33,8 +34,9 @@ type LMS interface {
 }
 
 type LTISettings struct {
-	Enable bool
-	LMSs   []interface{}
+	Enable                    bool
+	EnableSignatureValidation bool
+	LMSs                      []interface{}
 }
 
 // GetKnownLMSs can be used to extract a slice of known LMSs from LTI settings
