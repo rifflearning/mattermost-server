@@ -1241,10 +1241,6 @@
     "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-7"
   },
   {
-    "id": "api.lti.signup.create_user_failed",
-    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-9"
-  },
-  {
     "id": "api.oauth.allow_oauth.redirect_callback.app_error",
     "translation": "invalid_request: Supplied redirect_uri did not match registered callback_url"
   },
