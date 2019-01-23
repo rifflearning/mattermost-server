@@ -1205,40 +1205,48 @@
     "translation": "New format for the client license is not supported yet. Please specify format=old in the query string."
   },
   {
-    "id": "api.lti.login.app_error",
-    "translation": "There was an error with your login credentials. Please try again or contact your system administrator."
+    "id": "api.lti.login.disabled.app_error",
+    "translation": "There was an error with LTI login attempt. Please try again or contact your system administrator. Error code LTI-1"
   },
   {
-    "id": "api.lti.login.cookie.set_error",
-    "translation": "There was an error with your login credentials. Please try again or contact your system administrator. Error code LTI-8"
+    "id": "api.lti.login.parse.app_error",
+    "translation": "There was an error with LTI login attempt. Please try again or contact your system administrator. Error code LTI-2"
   },
   {
-    "id": "api.lti.signup.app_error.lti_disabled",
-    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-1"
+    "id": "api.lti.login.validation.app_error",
+    "translation": "There was an error with LTI login attempt. Please try again or contact your system administrator. Error code LTI-3"
   },
   {
-    "id": "api.lti.signup.app_error.lti_data.cookie_not_found",
-    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-2"
+    "id": "api.lti.login.encoding.app_error",
+    "translation": "There was an error with LTI login attempt. Please try again or contact your system administrator. Error code LTI-4"
   },
   {
-    "id": "api.lti.signup.app_error.lti_data.decoding_failed",
-    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-3"
+    "id": "api.lti.login.marshalling.app_error",
+    "translation": "There was an error with LTI login attempt. Please try again or contact your system administrator. Error code LTI-5"
   },
   {
-    "id": "api.lti.signup.app_error.lti_data.unmarshaling_failed",
-    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-4"
-  },
-  {
-    "id": "api.lti.signup.app_error.lti_launch_data.validation_failed",
-    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-5"
-  },
-  {
-    "id": "api.lti.signup.app_error.create_user.failed",
+    "id": "api.lti.signup.disabled.app_error",
     "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-6"
   },
   {
-    "id": "api.lti.signup.app_error.form.parse_failed",
+    "id": "api.lti.signup.cookie_missing.app_error",
     "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-7"
+  },
+  {
+    "id": "api.lti.signup.decoding.app_error",
+    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-8"
+  },
+  {
+    "id": "api.lti.signup.unmarshaling.app_error",
+    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-9"
+  },
+  {
+    "id": "api.lti.signup.validation.app_error",
+    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-10"
+  },
+  {
+    "id": "api.lti.signup.create_user.app_error",
+    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-11"
   },
   {
     "id": "api.oauth.allow_oauth.redirect_callback.app_error",
