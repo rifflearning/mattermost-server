@@ -82,7 +82,7 @@
         "EnableOpenServer": false,
         "EnableUserDeactivation": false,
         "RestrictCreationToDomains": "",
-        "EnableCustomBrand": true,
+        "EnableCustomBrand": false,
         "CustomBrandText": "Your course collaboration platform.\nConnected teams have better outcomes.",
         "CustomDescriptionText": "Your course collaboration platform. Connected teams have better outcomes.",
         "RestrictDirectMessage": "any",
