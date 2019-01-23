@@ -1206,39 +1206,39 @@
   },
   {
     "id": "api.lti.login.disabled.app_error",
-    "translation": "There was an error with LTI login attempt. Please try again or contact your system administrator. Error code LTI-1"
+    "translation": "There was an error with LTI login attempt. Please try again or contact your system administrator. Error code LTI-01"
   },
   {
     "id": "api.lti.login.parse.app_error",
-    "translation": "There was an error with LTI login attempt. Please try again or contact your system administrator. Error code LTI-2"
+    "translation": "There was an error with LTI login attempt. Please try again or contact your system administrator. Error code LTI-02"
   },
   {
     "id": "api.lti.login.validation.app_error",
-    "translation": "There was an error with LTI login attempt. Please try again or contact your system administrator. Error code LTI-3"
+    "translation": "There was an error with LTI login attempt. Please try again or contact your system administrator. Error code LTI-03"
   },
   {
     "id": "api.lti.login.encoding.app_error",
-    "translation": "There was an error with LTI login attempt. Please try again or contact your system administrator. Error code LTI-4"
+    "translation": "There was an error with LTI login attempt. Please try again or contact your system administrator. Error code LTI-04"
   },
   {
     "id": "api.lti.login.marshalling.app_error",
-    "translation": "There was an error with LTI login attempt. Please try again or contact your system administrator. Error code LTI-5"
+    "translation": "There was an error with LTI login attempt. Please try again or contact your system administrator. Error code LTI-05"
   },
   {
     "id": "api.lti.signup.disabled.app_error",
-    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-6"
+    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-06"
   },
   {
     "id": "api.lti.signup.cookie_missing.app_error",
-    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-7"
+    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-07"
   },
   {
     "id": "api.lti.signup.decoding.app_error",
-    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-8"
+    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-08"
   },
   {
     "id": "api.lti.signup.unmarshaling.app_error",
-    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-9"
+    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-09"
   },
   {
     "id": "api.lti.signup.validation.app_error",
