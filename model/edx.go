@@ -31,23 +31,19 @@ type EdxDefaultChannel struct {
 	DisplayName string
 }
 
-type EdxTeamMapping [] struct {
-	ContextId string
-	TeamName  string
-}
-
 type EdxLMS struct {
+	Name				string
 	Type                string
 	OAuthConsumerKey    string
 	OAuthConsumerSecret string
-	Teams               EdxTeamMapping
+	Teams               map[string]string
 
 	PersonalChannels EdxPersonalChannels
 	DefaultChannels  map[string]EdxDefaultChannel
 }
 
 func (e *EdxLMS) GetName() string {
-	return "Appsembler"
+	return e.Name
 }
 
 func (e *EdxLMS) GetType() string {
@@ -60,10 +56,6 @@ func (e *EdxLMS) GetOAuthConsumerKey() string {
 
 func (e *EdxLMS) GetOAuthConsumerSecret() string {
 	return e.OAuthConsumerSecret
-}
-
-func (e *EdxLMS) GetValidateLTIRequest() bool {
-	return true
 }
 
 func (e *EdxLMS) ValidateLTIRequest(url string, request *http.Request) bool {

@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	LMS_TYPE_FIELD = "type"
+	LMS_TYPE_FIELD = "Type"
 
 	LMS_TYPE_EDX = "edx"
 
@@ -35,7 +35,7 @@ type LMS interface {
 
 type LTISettings struct {
 	Enable bool
-	LMSs   map[string]interface{}
+	LMSs   []interface{}
 }
 
 // GetKnownLMSs can be used to extract a slice of known LMSs from LTI settings

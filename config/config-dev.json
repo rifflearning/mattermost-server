@@ -328,20 +328,19 @@
     },
     "LTISettings": {
         "Enable": true,
-        "LMSs": {
-            "Emeritus": {
-
+        "LMSs": [
+            {
+                "Name": "Emeritus",
+                "Type": "abc"
             },
-            "Appsembler": {
+            {
+                "Name": "Appsembler",
                 "Type": "edx",
                 "OAuthConsumerKey": "edx-appsembler-test_5345",
                 "OAuthConsumerSecret": "secret",
-                "Teams": [
-                    {
-                        "ContextId": "course-v1:appsembler-the-red+Riff+101",
-                        "TeamName": "riff-a"
-                    }
-                ],
+                "Teams": {
+                    "course-v1:appsembler-the-red+Riff+101": "riff-a"
+                },
                 "PersonalChannels": {
                     "Type": "custom-properties",
                     "ChannelList": {
@@ -362,7 +361,7 @@
                     }
                 }
             }
-        }
+        ]
     },
     "NativeAppSettings": {
         "AppDownloadLink": "https://about.mattermost.com/downloads/",
