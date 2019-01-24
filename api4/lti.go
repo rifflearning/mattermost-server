@@ -61,11 +61,9 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	// create user
 	props := model.MapFromJson(r.Body)
 	user := lms.BuildUser(ltiLaunchData, props["password"])
-	user, appErr := c.App.CreateUser(user)
-
-	if appErr != nil {
+	if _, appErr := c.App.CreateUser(user); appErr != nil {
 		mlog.Error("Error occurred while creating LTI user: " + appErr.Error())
-		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.create_user.app_error", nil, appErr.Error(), appErr.StatusCode)
+		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.create_user.app_error", map[string]interface{}{"UserError": appErr.Message}, appErr.Error(), appErr.StatusCode)
 		return
 	}
 

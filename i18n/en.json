@@ -1250,7 +1250,7 @@
   },
   {
     "id": "api.lti.signup.create_user.app_error",
-    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-11"
+    "translation": "There was an error with LTI signup attempt. {{.UserError}} Please try again or contact your system administrator. Error code LTI-11"
   },
   {
     "id": "api.lti.signup.no_lms_found",
