@@ -32,7 +32,7 @@ type EdxDefaultChannel struct {
 }
 
 type EdxLMS struct {
-	Name				string
+	Name                string
 	Type                string
 	OAuthConsumerKey    string
 	OAuthConsumerSecret string
