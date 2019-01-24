@@ -17,21 +17,29 @@ const (
 )
 
 type EdxChannel struct {
-	CourseType   string
+	IdProperty   string
 	NameProperty string
-	IDProperty   string
 }
 
-type EdxUserChannelsSettings struct {
+type EdxPersonalChannels struct {
 	Type        string
-	ChannelList []EdxChannel
+	ChannelList map[string]EdxChannel
+}
+
+type EdxDefaultChannel struct {
+	Name        string
+	DisplayName string
 }
 
 type EdxLMS struct {
-	Name         string
-	Type         string
-	OAuth        LMSOAuthSettings
-	UserChannels EdxUserChannelsSettings
+	Name                string
+	Type                string
+	OAuthConsumerKey    string
+	OAuthConsumerSecret string
+	Teams               map[string]string
+
+	PersonalChannels EdxPersonalChannels
+	DefaultChannels  map[string]EdxDefaultChannel
 }
 
 func (e *EdxLMS) GetName() string {
@@ -42,16 +50,16 @@ func (e *EdxLMS) GetType() string {
 	return e.Type
 }
 
-func (e *EdxLMS) GetOAuth() LMSOAuthSettings {
-	return e.OAuth
+func (e *EdxLMS) GetOAuthConsumerKey() string {
+	return e.OAuthConsumerKey
 }
 
-func (e *EdxLMS) GetValidateLTIRequest() bool {
-	return true
+func (e *EdxLMS) GetOAuthConsumerSecret() string {
+	return e.OAuthConsumerSecret
 }
 
 func (e *EdxLMS) ValidateLTIRequest(url string, request *http.Request) bool {
-	return baseValidateLTIRequest(e.OAuth.ConsumerSecret, e.OAuth.ConsumerKey, url, request)
+	return baseValidateLTIRequest(e.OAuthConsumerSecret, e.OAuthConsumerKey, url, request)
 }
 
 func (e *EdxLMS) BuildUser(launchData map[string]string, password string) *User {
@@ -63,7 +71,7 @@ func (e *EdxLMS) BuildUser(launchData map[string]string, password string) *User 
 		Position:  launchData[launchDataPositionKey],
 		Password:  password,
 		Props: StringMap{
-			LTI_USER_ID_PROP_KEY : launchData[launchDataLTIUserIdKey],
+			LTI_USER_ID_PROP_KEY: launchData[launchDataLTIUserIdKey],
 		},
 	}
 }
