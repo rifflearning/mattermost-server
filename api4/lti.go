@@ -48,6 +48,10 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	// validate launch data
 	consumerKey := ltiLaunchData["oauth_consumer_key"]
 	lms := c.App.GetLMSToUse(consumerKey)
+	if lms == nil {
+		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.no_lms_found", nil, "", http.StatusBadRequest)
+		return
+	}
 
 	if c.App.Config().LTISettings.EnableSignatureValidation && !lms.ValidateLTIRequest(c.GetSiteURLHeader()+"/login/lti", addLaunchDataToForm(ltiLaunchData, r)) {
 		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.validation.app_error", nil, "", http.StatusBadRequest)

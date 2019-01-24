@@ -45,6 +45,10 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	mlog.Debug("Validate LTI request. LTI Signature Validation enabled: " + strconv.FormatBool(c.App.Config().LTISettings.EnableSignatureValidation))
 	consumerKey := r.FormValue("oauth_consumer_key")
 	lms := c.App.GetLMSToUse(consumerKey)
+	if lms == nil {
+		c.Err = model.NewAppError("loginWithLTI", "api.lti.login.no_lms_found", nil, "", http.StatusBadRequest)
+		return
+	}
 
 	if c.App.Config().LTISettings.EnableSignatureValidation && !lms.ValidateLTIRequest(c.GetSiteURLHeader()+c.Path, r) {
 		c.Err = model.NewAppError("loginWithLTI", "api.lti.login.validation.app_error", nil, "", http.StatusBadRequest)
