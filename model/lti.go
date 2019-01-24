@@ -5,8 +5,9 @@ package model
 
 import (
 	"encoding/json"
-	"github.com/mattermost/mattermost-server/mlog"
 	"net/http"
+
+	"github.com/mattermost/mattermost-server/mlog"
 )
 
 const (
@@ -34,8 +35,9 @@ type LMS interface {
 }
 
 type LTISettings struct {
-	Enable bool
-	LMSs   []interface{}
+	Enable                    bool
+	EnableSignatureValidation bool
+	LMSs                      []interface{}
 }
 
 // GetKnownLMSs can be used to extract a slice of known LMSs from LTI settings
@@ -70,4 +72,16 @@ func baseValidateLTIRequest(consumerSecret, consumerKey, url string, request *ht
 	}
 
 	return true
+}
+
+func transformLTIUsername(ltiUsername string) string {
+	mattermostUsername := ""
+
+	for _, c := range ltiUsername {
+		if (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '-' || c == '.' || c == '_' {
+			mattermostUsername += string(c)
+		}
+	}
+
+	return mattermostUsername
 }

@@ -65,7 +65,7 @@ func (e *EdxLMS) ValidateLTIRequest(url string, request *http.Request) bool {
 func (e *EdxLMS) BuildUser(launchData map[string]string, password string) *User {
 	return &User{
 		Email:     launchData[launchDataEmailKey],
-		Username:  launchData[launchDataUsernameKey],
+		Username:  transformLTIUsername(launchData[launchDataUsernameKey]),
 		FirstName: launchData[launchDataFirstNameKey],
 		LastName:  launchData[launchDataLastNameKey],
 		Position:  launchData[launchDataPositionKey],
