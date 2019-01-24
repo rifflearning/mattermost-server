@@ -1226,7 +1226,7 @@
   },
   {
     "id": "api.lti.login.no_lms_found",
-    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-12"
+    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-13"
   },
   {
     "id": "api.lti.signup.disabled.app_error",
