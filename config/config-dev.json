@@ -75,7 +75,7 @@
         "EnableEmailInvitations": false
     },
     "TeamSettings": {
-        "SiteName": "Mattermost",
+        "SiteName": "Riff Edu",
         "MaxUsersPerTeam": 50,
         "EnableTeamCreation": true,
         "EnableUserCreation": true,
@@ -83,8 +83,8 @@
         "EnableUserDeactivation": false,
         "RestrictCreationToDomains": "",
         "EnableCustomBrand": false,
-        "CustomBrandText": "",
-        "CustomDescriptionText": "",
+        "CustomBrandText": "Your course collaboration platform.\nConnected teams have better outcomes.",
+        "CustomDescriptionText": "Your course collaboration platform. Connected teams have better outcomes.",
         "RestrictDirectMessage": "any",
         "RestrictTeamInvite": "all",
         "RestrictPublicChannelManagement": "all",
@@ -328,6 +328,7 @@
     },
     "LTISettings": {
         "Enable": true,
+        "EnableSignatureValidation": false,
         "Lmss": [
             {
                 "Name": "Emeritus",
