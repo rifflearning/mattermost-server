@@ -35,8 +35,8 @@ const (
 	SigHMAC      = "HMAC-SHA1"
 )
 
-// Provider is an app, that can consume LTI messages,
-// also a provider could be used, to construct messages and sign them
+// Provider is an app that can consume LTI messages,
+// also a provider could be used to construct messages and sign them
 //
 //  p := lti.NewProvider("secret", "http://url.com")
 //  p.Add("param_name", "vale").
@@ -44,13 +44,13 @@ const (
 //
 //  sig, err := p.Sign()
 //
-// will sign, the request, and add the needed fields to the
+// will sign the request, and add the needed fields to the
 // Provider.values > Can access it throught p.Params()
 // It also can be used to Verify and handle, incoming LTI requests.
 //
-//  p.IsValid(requesto)
+//  p.IsValid(request)
 //
-// A Provider also holds a internal params url.Values, that can
+// A Provider also holds an internal params url.Values, that can
 // be accessed via Get, or Add.
 type Provider struct {
 	Secret      string
@@ -76,7 +76,7 @@ func NewProvider(secret, urlSrv string) *Provider {
 	}
 }
 
-// HasRole checks if a LTI request, has a provided role
+// HasRole checks if an LTI request has a provided role
 func (p *Provider) HasRole(role string) bool {
 	ro := strings.Split(p.Get("roles"), ",")
 	roles := strings.Join(ro, " ") + " "
@@ -102,7 +102,7 @@ func (p *Provider) SetParams(v url.Values) *Provider {
 	return p
 }
 
-// Add a new param to a LTI request
+// Add a new param to an LTI request
 func (p *Provider) Add(k, v string) *Provider {
 	if p.values == nil {
 		p.values = url.Values{}
@@ -119,8 +119,8 @@ func (p *Provider) Empty(key string) bool {
 	return p.values.Get(key) == ""
 }
 
-// Sign a request, adding, required fields,
-// A request, can be drilled on a template, iterating, over p.Prams()
+// Sign a request, adding required fields,
+// A request, can be drilled on a template, iterating, over p.Params()
 func (p *Provider) Sign() (string, error) {
 	if p.Empty("oauth_version") {
 		p.Add("oauth_version", oAuthVersion)
