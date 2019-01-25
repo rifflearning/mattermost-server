@@ -75,3 +75,25 @@ func (e *EdxLMS) BuildUser(launchData map[string]string, password string) *User 
 		},
 	}
 }
+
+func (e *EdxLMS) GetTeam(launchData map[string]string) string {
+	contextId := launchData["context_id"]
+	return e.Teams[contextId]
+}
+
+func (e *EdxLMS) GetPublicChannelsToJoin(launchData map[string]string) map[string]string {
+	// TODO check if need to join default channels if MM experimental default channel doesn't works
+	return map[string]string{}
+}
+
+func (e *EdxLMS) GetPrivateChannelsToJoin(launchData map[string]string) map[string]string {
+	channels := map[string]string{}
+
+	for _, channelConfig := range e.PersonalChannels.ChannelList {
+		channelDisplayName := launchData[channelConfig.NameProperty]
+		channelSlug := launchData[channelConfig.IdProperty]
+		channels[channelSlug] = channelDisplayName
+	}
+
+	return channels
+}
