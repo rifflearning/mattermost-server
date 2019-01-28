@@ -5,15 +5,19 @@ package model
 
 import (
 	"net/http"
+	"strings"
 )
 
 const (
-	launchDataEmailKey     = "lis_person_contact_email_primary"
-	launchDataUsernameKey  = "lis_person_sourcedid"
-	launchDataFirstNameKey = "lis_person_name_given"
-	launchDataLastNameKey  = "lis_person_name_family"
-	launchDataPositionKey  = "roles"
-	launchDataLTIUserIdKey = "custom_user_id"
+	launchDataEmailKey           = "lis_person_contact_email_primary"
+	launchDataUsernameKey        = "lis_person_sourcedid"
+	launchDataFirstNameKey       = "lis_person_name_given"
+	launchDataLastNameKey        = "lis_person_name_family"
+	launchDataPositionKey        = "roles"
+	launchDataLTIUserIdKey       = "custom_user_id"
+	launchDataChannelRedirectKey = "custom_channel_redirect"
+
+	redirectChannelLookupKeyword = "lookup"
 )
 
 type EdxChannel struct {
@@ -74,4 +78,54 @@ func (e *EdxLMS) BuildUser(launchData map[string]string, password string) *User 
 			LTI_USER_ID_PROP_KEY: launchData[launchDataLTIUserIdKey],
 		},
 	}
+}
+
+func (e *EdxLMS) GetTeam(launchData map[string]string) string {
+	contextId := launchData["context_id"]
+	return e.Teams[contextId]
+}
+
+func (e *EdxLMS) GetPublicChannelsToJoin(launchData map[string]string) map[string]string {
+	// TODO check if need to join default channels if MM experimental default channel doesn't works
+	return map[string]string{}
+}
+
+func (e *EdxLMS) GetPrivateChannelsToJoin(launchData map[string]string) map[string]string {
+	channels := map[string]string{}
+
+	for _, channelConfig := range e.PersonalChannels.ChannelList {
+		channelDisplayName := launchData[channelConfig.NameProperty]
+		channelSlug := launchData[channelConfig.IdProperty]
+
+		if channelDisplayName != "" && channelSlug != "" {
+			channels[channelSlug] = channelDisplayName
+		}
+	}
+
+	return channels
+}
+
+func (e *EdxLMS) GetChannel(launchData map[string]string) (string, *AppError) {
+	customChannelRedirect, ok := launchData[launchDataChannelRedirectKey]
+	if !ok {
+		return "", nil
+	}
+
+	var channelSlug string
+
+	components := strings.Split(customChannelRedirect, ":")
+	if len(components) == 1 {
+		channelSlug = components[0]
+	} else if components[0] == redirectChannelLookupKeyword {
+		edxChannel, ok := e.PersonalChannels.ChannelList[components[1]]
+		if !ok {
+			return "", NewAppError("GetChannel", "get_channel.redirect_lookup_channel.not_found", nil, "", http.StatusBadRequest)
+		}
+
+		channelSlug = launchData[edxChannel.IdProperty]
+	} else {
+
+	}
+
+	return channelSlug, nil
 }
