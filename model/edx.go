@@ -96,7 +96,10 @@ func (e *EdxLMS) GetPrivateChannelsToJoin(launchData map[string]string) map[stri
 	for _, channelConfig := range e.PersonalChannels.ChannelList {
 		channelDisplayName := launchData[channelConfig.NameProperty]
 		channelSlug := launchData[channelConfig.IdProperty]
-		channels[channelSlug] = channelDisplayName
+
+		if channelDisplayName != "" && channelSlug != "" {
+			channels[channelSlug] = channelDisplayName
+		}
 	}
 
 	return channels

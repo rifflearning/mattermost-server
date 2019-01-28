@@ -52,7 +52,8 @@ func (a *App) createAndJoinChannels(teamId string, channels map[string]string, c
 				DisplayName: displayName,
 			}
 
-			if _, err := a.CreateChannel(channel, false); err != nil {
+			channel, err = a.CreateChannel(channel, false)
+			if err != nil {
 				mlog.Error("Failed to create channel for LMS onboardin: " + err.Error())
 			}
 		}
