@@ -35,6 +35,7 @@ type LMS interface {
 	GetTeam(launchData map[string]string) string
 	GetPublicChannelsToJoin(launchData map[string]string) map[string]string
 	GetPrivateChannelsToJoin(launchData map[string]string) map[string]string
+	GetChannel(launchData map[string]string) (string, *AppError)
 }
 
 type LTISettings struct {

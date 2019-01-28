@@ -5,15 +5,19 @@ package model
 
 import (
 	"net/http"
+	"strings"
 )
 
 const (
-	launchDataEmailKey     = "lis_person_contact_email_primary"
-	launchDataUsernameKey  = "lis_person_sourcedid"
-	launchDataFirstNameKey = "lis_person_name_given"
-	launchDataLastNameKey  = "lis_person_name_family"
-	launchDataPositionKey  = "roles"
-	launchDataLTIUserIdKey = "custom_user_id"
+	launchDataEmailKey           = "lis_person_contact_email_primary"
+	launchDataUsernameKey        = "lis_person_sourcedid"
+	launchDataFirstNameKey       = "lis_person_name_given"
+	launchDataLastNameKey        = "lis_person_name_family"
+	launchDataPositionKey        = "roles"
+	launchDataLTIUserIdKey       = "custom_user_id"
+	launchDataChannelRedirectKey = "custom_channel_redirect"
+
+	redirectChannelLookupKeyword = "lookup"
 )
 
 type EdxChannel struct {
@@ -96,4 +100,29 @@ func (e *EdxLMS) GetPrivateChannelsToJoin(launchData map[string]string) map[stri
 	}
 
 	return channels
+}
+
+func (e *EdxLMS) GetChannel(launchData map[string]string) (string, *AppError) {
+	customChannelRedirect, ok := launchData[launchDataChannelRedirectKey]
+	if !ok {
+		return "", nil
+	}
+
+	var channelSlug string
+
+	components := strings.Split(customChannelRedirect, ":")
+	if len(components) == 1 {
+		channelSlug = components[0]
+	} else if components[0] == redirectChannelLookupKeyword {
+		edxChannel, ok := e.PersonalChannels.ChannelList[components[1]]
+		if !ok {
+			return "", NewAppError("GetChannel", "get_channel.redirect_lookup_channel.not_found", nil, "", http.StatusBadRequest)
+		}
+
+		channelSlug = launchData[edxChannel.IdProperty]
+	} else {
+
+	}
+
+	return channelSlug, nil
 }
