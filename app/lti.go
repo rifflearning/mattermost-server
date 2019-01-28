@@ -15,3 +15,18 @@ func (a *App) GetLMSToUse(consumerKey string) model.LMS {
 	}
 	return nil
 }
+
+func (a *App) PatchLTIUser(userId string, ltiUserId string) (*model.User, *model.AppError) {
+	user, err := a.GetUser(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	user.Props[model.LTI_USER_ID_PROP_KEY] = ltiUserId
+	user, err = a.UpdateUser(user, false)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
