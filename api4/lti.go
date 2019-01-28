@@ -72,9 +72,6 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: create required channels here
-	// TODO: add user to required channels here
-
 	ReturnStatusOK(w)
 }
 

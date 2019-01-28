@@ -27,6 +27,7 @@ func (a *App) OnboardLMSUser(userId string, lms model.LMS, launchData map[string
 	}
 
 	if _, err := a.GetTeamMember(team.Id, userId); err != nil {
+		// user is not a member of team. Adding team member
 		if _, err := a.AddTeamMember(team.Id, userId); err != nil {
 			mlog.Error(fmt.Sprintf("Error occurred while adding user %s to team %s: %s", userId, team.Id, err.Error()))
 		}
@@ -42,7 +43,7 @@ func (a *App) createAndJoinChannels(teamId string, channels map[string]string, c
 	for slug, displayName := range channels {
 		channel, err := a.GetChannelByName(slug, teamId, true)
 		if err != nil {
-			// channel doesnt exist
+			// channel doesnt exist, create it
 			channel = &model.Channel {
 				TeamId: teamId,
 				Type: channelType,
@@ -61,10 +62,3 @@ func (a *App) createAndJoinChannels(teamId string, channels map[string]string, c
 	}
 }
 
-func (a *App) searchTeamsByName(name string) ([]*model.Team, *model.AppError) {
-	if result := <-a.Srv.Store.Team().SearchByName(name); result.Err != nil {
-		return nil, result.Err
-	} else {
-		return result.Data.([]*model.Team), nil
-	}
-}
