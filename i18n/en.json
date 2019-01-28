@@ -1257,7 +1257,7 @@
     "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-13"
   },
   {
-    "id": "onboard_lms_user.team_not_found.app_error",
+    "id": "app.onboard_lms_user.team_not_found.app_error",
     "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-14"
   },
   {

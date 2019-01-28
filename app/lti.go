@@ -5,9 +5,10 @@ package app
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/mattermost/mattermost-server/mlog"
 	"github.com/mattermost/mattermost-server/model"
-	"net/http"
 )
 
 func (a *App) GetLMSToUse(consumerKey string) model.LMS {
@@ -24,7 +25,7 @@ func (a *App) OnboardLMSUser(userId string, lms model.LMS, launchData map[string
 	team, err := a.GetTeamByName(teamSlug)
 	if err != nil {
 		mlog.Error(fmt.Sprintf("Team to be used: %s could not be found: %s", teamSlug, err.Error()))
-		return model.NewAppError("OnboardLMSUser", "onboard_lms_user.team_not_found.app_error", nil, "", http.StatusInternalServerError)
+		return model.NewAppError("OnboardLMSUser", "app.onboard_lms_user.team_not_found.app_error", nil, "", http.StatusInternalServerError)
 	}
 
 	if _, err := a.GetTeamMember(team.Id, userId); err != nil {
@@ -45,10 +46,10 @@ func (a *App) createAndJoinChannels(teamId string, channels map[string]string, c
 		channel, err := a.GetChannelByName(slug, teamId, true)
 		if err != nil {
 			// channel doesnt exist, create it
-			channel = &model.Channel {
-				TeamId: teamId,
-				Type: channelType,
-				Name: slug,
+			channel = &model.Channel{
+				TeamId:      teamId,
+				Type:        channelType,
+				Name:        slug,
 				DisplayName: displayName,
 			}
 
@@ -63,4 +64,3 @@ func (a *App) createAndJoinChannels(teamId string, channels map[string]string, c
 		}
 	}
 }
-
