@@ -1257,6 +1257,10 @@
     "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-12"
   },
   {
+    "id": "onboard_lms_user.team_not_found.app_error",
+    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-13"
+  },
+  {
     "id": "api.oauth.allow_oauth.redirect_callback.app_error",
     "translation": "invalid_request: Supplied redirect_uri did not match registered callback_url"
   },

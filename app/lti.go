@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/mattermost/mattermost-server/mlog"
 	"github.com/mattermost/mattermost-server/model"
+	"net/http"
 )
 
 func (a *App) GetLMSToUse(consumerKey string) model.LMS {
@@ -22,8 +23,8 @@ func (a *App) OnboardLMSUser(userId string, lms model.LMS, launchData map[string
 	teamSlug := lms.GetTeam(launchData)
 	team, err := a.GetTeamByName(teamSlug)
 	if err != nil {
-		// TODO create team here
-		return err
+		mlog.Error(fmt.Sprintf("Team to be used: %s could not be found: %s", teamSlug, err.Error()))
+		return model.NewAppError("OnboardLMSUser", "onboard_lms_user.team_not_found.app_error", nil, "", http.StatusInternalServerError)
 	}
 
 	if _, err := a.GetTeamMember(team.Id, userId); err != nil {
