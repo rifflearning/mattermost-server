@@ -6,7 +6,6 @@ package web
 import (
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -30,17 +29,20 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// printing launch data for debugging purpose
-	mlog.Debug("LTI Launch Data is: ")
-	for k, v := range r.Form {
-		mlog.Debug(fmt.Sprintf("[%s: %s]", k, v[0]))
-	}
-
 	// to populate r.Form
 	if err := r.ParseForm(); err != nil {
-		mlog.Error("Error occurred while parsing submited form: " + err.Error())
+		mlog.Error("Error occurred while parsing submitted form: " + err.Error())
 		c.Err = model.NewAppError("loginWithLTI", "api.lti.login.parse.app_error", nil, "", http.StatusBadRequest)
+		return
 	}
+
+	// printing launch data for debugging purposes
+	body := make(map[string]string)
+	for k, v := range r.Form {
+		body[k] = v[0]
+	}
+
+	mlog.Debug("LTI Launch Data", mlog.String("URL", c.GetSiteURLHeader()+c.Path), mlog.Any("Body", body))
 
 	mlog.Debug("Validate LTI request. LTI Signature Validation enabled: " + strconv.FormatBool(c.App.Config().LTISettings.EnableSignatureValidation))
 	consumerKey := r.FormValue("oauth_consumer_key")
