@@ -11,6 +11,7 @@ import (
 
 	"github.com/mattermost/mattermost-server/mlog"
 	"github.com/mattermost/mattermost-server/model"
+	"github.com/mattermost/mattermost-server/web"
 )
 
 func (api *API) InitLTI() {
@@ -69,6 +70,11 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := c.App.OnboardLTIUser(user.Id, lms, ltiLaunchData); err != nil {
+		c.Err = err
+		return
+	}
+
+	if err := web.CompleteLTILogin(c, w, r, user); err != nil {
 		c.Err = err
 		return
 	}

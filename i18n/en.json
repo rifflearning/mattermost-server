@@ -1205,19 +1205,23 @@
     "translation": "New format for the client license is not supported yet. Please specify format=old in the query string."
   },
   {
-    "id": "api.lti.login.disabled.app_error",
+    "id": "web.lti.login.disabled.app_error",
     "translation": "There was an error with LTI login attempt. Please try again or contact your system administrator. Error code LTI-01"
   },
   {
-    "id": "api.lti.login.parse.app_error",
+    "id": "web.lti.login.parse.app_error",
     "translation": "There was an error with LTI login attempt. Please try again or contact your system administrator. Error code LTI-02"
   },
   {
-    "id": "api.lti.login.validation.app_error",
+    "id": "web.lti.login.validation.app_error",
     "translation": "There was an error with LTI login attempt. Please try again or contact your system administrator. Error code LTI-03"
   },
   {
-    "id": "api.lti.login.marshalling.app_error",
+    "id": "web.lti.login.cross_linked_users.app_error",
+    "translation": "There was an error with LTI login attempt. Please try again or contact your system administrator. Error code LTI-04"
+  },
+  {
+    "id": "web.lti.login.marshalling.app_error",
     "translation": "There was an error with LTI login attempt. Please try again or contact your system administrator. Error code LTI-05"
   },
   {
@@ -1249,7 +1253,7 @@
     "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-12"
   },
   {
-    "id": "api.lti.login.no_lms_found",
+    "id": "web.lti.login.no_lms_found",
     "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-13"
   },
   {
@@ -1259,6 +1263,22 @@
   {
     "id": "get_channel.redirect_lookup_channel.not_found",
     "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-15"
+  },
+  {
+    "id": "web.lti.login.patch_user.app_error",
+    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-16"
+  },
+  {
+    "id": "web.lti.login.onboard_user.app_error",
+    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-17"
+  },
+  {
+    "id": "web.lti.login.sync_user.app_error",
+    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-18"
+  },
+  {
+    "id": "web.lti.login.login_user.app_error",
+    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-19"
   },
   {
     "id": "api.oauth.allow_oauth.redirect_callback.app_error",

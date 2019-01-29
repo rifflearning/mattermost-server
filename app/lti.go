@@ -67,7 +67,6 @@ func (a *App) SyncLTIUser(userId string, lms model.LMS, launchData map[string]st
 		return nil, err
 	}
 
-	// TODO: confirm if we need to re-join channels or not
 	if err := a.OnboardLTIUser(userId, lms, launchData); err != nil {
 		return nil, err
 	}
@@ -146,11 +145,12 @@ func (a *App) GetUserByLTI(ltiUserID string) (*model.User, *model.AppError) {
 
 // GetLTIUser can be used to get an LTI user by lti user id or email
 func (a *App) GetLTIUser(ltiUserID, email string) (*model.User, *model.AppError) {
-	if user, err := a.GetUserByLTI(ltiUserID); err == nil {
-		return user, nil
+	user, err := a.GetUserByLTI(ltiUserID)
+	if err != nil {
+		user, err = a.GetUserByEmail(email)
 	}
-	if user, err := a.GetUserByEmail(email); err == nil {
-		return user, nil
+	if err != nil {
+		return nil, err
 	}
-	return nil, model.NewAppError("GetLTIUserByEmailOrID", "api.lti.get_user.not_found.app_error", nil, "", http.StatusNotFound)
+	return user, nil
 }
