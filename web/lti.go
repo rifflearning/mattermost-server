@@ -57,14 +57,12 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	encodedRequest, appError := encodeLTIRequest(r.Form)
-	if appError != nil {
-		c.Err = appError
+	if err := setLTIDataCookie(c, w, r); err != nil {
+		c.Err = err
 		return
 	}
-	setLTIDataCookie(c, w, encodedRequest)
 
-	mlog.Debug("Redirecting to the LTI signup page")
+	mlog.Debug("Redirecting to: " + c.GetSiteURLHeader() + "/signup_lti")
 	http.Redirect(w, r, c.GetSiteURLHeader()+"/signup_lti", http.StatusFound)
 }
 
@@ -88,7 +86,16 @@ func encodeLTIRequest(v url.Values) (string, *model.AppError) {
 	return base64.StdEncoding.EncodeToString([]byte(string(res))), nil
 }
 
-func setLTIDataCookie(c *Context, w http.ResponseWriter, encodedRequest string) {
+func setLTIDataCookie(c *Context, w http.ResponseWriter, r *http.Request) *model.AppError {
+	if err := r.ParseForm(); err != nil {
+		return model.NewAppError("loginWithLTI", "api.lti.login.parse.app_error", nil, "", http.StatusBadRequest)
+	}
+
+	encodedRequest, appError := encodeLTIRequest(r.Form)
+	if appError != nil {
+		return appError
+	}
+
 	maxAge := 600 // 10 minutes
 	expiresAt := time.Unix(model.GetMillis()/1000+int64(maxAge), 0)
 	cookie := &http.Cookie{
@@ -102,4 +109,5 @@ func setLTIDataCookie(c *Context, w http.ResponseWriter, encodedRequest string) 
 	}
 
 	http.SetCookie(w, cookie)
+	return nil
 }
