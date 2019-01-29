@@ -12,6 +12,7 @@ import (
 
 	"github.com/mattermost/mattermost-server/mlog"
 	"github.com/mattermost/mattermost-server/model"
+	"fmt"
 )
 
 func (w *Web) InitLti() {
@@ -56,13 +57,7 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := setLTIDataCookie(c, w, launchData); err != nil {
-		c.Err = err
-		return
-	}
-
-	mlog.Debug("Redirecting to: " + c.GetSiteURLHeader() + "/signup_lti")
-	http.Redirect(w, r, c.GetSiteURLHeader()+"/signup_lti", http.StatusFound)
+	LoginLTIUser(c, w, r, lms, launchData)
 }
 
 func encodeLTIRequest(launchData map[string]string) (string, *model.AppError) {
@@ -95,4 +90,56 @@ func setLTIDataCookie(c *Context, w http.ResponseWriter, launchData map[string]s
 
 	http.SetCookie(w, cookie)
 	return nil
+}
+
+func LoginLTIUser(c *Context, w http.ResponseWriter, r *http.Request, lms model.LMS, launchData map[string]string) {
+	ltiUserID := lms.GetUserId(launchData)
+	email := lms.GetEmail(launchData)
+
+	user, err := c.App.GetLTIUser(ltiUserID, email)
+	fmt.Println(user, err)
+	if customID, ok := user.Props[model.LTI_USER_ID_PROP_KEY]; ok && customID == ltiUserID {
+		// user found by lti user id
+		// todo: sync user
+		// todo: onboard user
+		loginUser(c, w, r, user)
+
+		// todo: redirect to channel instead
+		http.Redirect(w, r, c.GetSiteURLHeader(), http.StatusFound)
+	} else if user.Email == email {
+		if customID, ok := user.Props[model.LTI_USER_ID_PROP_KEY]; !ok || customID == "" {
+			// if the mm user found by email is not linked to any lms account
+			// todo: patch user
+			// todo: sync user
+			// todo: onboard user
+			loginUser(c, w, r, user)
+
+			// todo: redirect to channel instead
+			http.Redirect(w, r, c.GetSiteURLHeader(), http.StatusFound)
+			return
+		} else {
+			// if the mm user found by email is linked to a different lms account
+			c.Err = model.NewAppError("loginWithLTI", "api.lti.login.cross_linked_users.app_error", nil, "", http.StatusBadRequest)
+			return
+		}
+	} else {
+		// if no mm user found by email or lti_user_id
+		c.Logout(w, r)
+		if err := setLTIDataCookie(c, w, launchData); err != nil {
+			c.Err = err
+			return
+		}
+		http.Redirect(w, r, c.GetSiteURLHeader()+"/signup_lti", http.StatusFound)
+		return
+	}
+}
+
+func loginUser(c *Context, w http.ResponseWriter, r *http.Request, user *model.User) {
+	session, appErr := c.App.DoLogin(w, r, user, "")
+	if appErr != nil {
+		c.Err = appErr
+		return
+	}
+
+	c.Session = *session
 }

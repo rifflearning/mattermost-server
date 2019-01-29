@@ -26,10 +26,12 @@ type LMSOAuthSettings struct {
 }
 
 type LMS interface {
+	GetEmail(launchData map[string]string) string
 	GetName() string
 	GetType() string
 	GetOAuthConsumerKey() string
 	GetOAuthConsumerSecret() string
+	GetUserId(launchData map[string]string) string
 	ValidateLTIRequest(url string, request *http.Request) bool
 	BuildUser(launchData map[string]string, password string) *User
 	GetTeam(launchData map[string]string) string

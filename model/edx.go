@@ -46,6 +46,10 @@ type EdxLMS struct {
 	DefaultChannels  map[string]EdxDefaultChannel
 }
 
+func (e *EdxLMS) GetEmail(launchData map[string]string) string {
+	return launchData[launchDataEmailKey]
+}
+
 func (e *EdxLMS) GetName() string {
 	return e.Name
 }
@@ -62,20 +66,24 @@ func (e *EdxLMS) GetOAuthConsumerSecret() string {
 	return e.OAuthConsumerSecret
 }
 
+func (e *EdxLMS) GetUserId(launchData map[string]string) string {
+	return launchData[launchDataLTIUserIdKey]
+}
+
 func (e *EdxLMS) ValidateLTIRequest(url string, request *http.Request) bool {
 	return baseValidateLTIRequest(e.OAuthConsumerSecret, e.OAuthConsumerKey, url, request)
 }
 
 func (e *EdxLMS) BuildUser(launchData map[string]string, password string) *User {
 	return &User{
-		Email:     launchData[launchDataEmailKey],
+		Email:     e.GetEmail(launchData),
 		Username:  transformLTIUsername(launchData[launchDataUsernameKey]),
 		FirstName: launchData[launchDataFirstNameKey],
 		LastName:  launchData[launchDataLastNameKey],
 		Position:  launchData[launchDataPositionKey],
 		Password:  password,
 		Props: StringMap{
-			LTI_USER_ID_PROP_KEY: launchData[launchDataLTIUserIdKey],
+			LTI_USER_ID_PROP_KEY: e.GetUserId(launchData),
 		},
 	}
 }

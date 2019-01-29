@@ -64,3 +64,26 @@ func (a *App) createAndJoinChannels(teamId string, channels map[string]string, c
 		}
 	}
 }
+
+func (a *App) GetUserByLTI(ltiUserID string) (*model.User, *model.AppError) {
+	if result := <-a.Srv.Store.User().GetByLTI(ltiUserID); result.Err != nil && result.Err.Id == "store.sql_user.get_by_lti.missing_account.app_error" {
+		result.Err.StatusCode = http.StatusNotFound
+		return nil, result.Err
+	} else if result.Err != nil {
+		result.Err.StatusCode = http.StatusBadRequest
+		return nil, result.Err
+	} else {
+		return result.Data.(*model.User), nil
+	}
+}
+
+// GetLTIUser can be used to get an LTI user by lti user id or email
+func (a *App) GetLTIUser(ltiUserID, email string) (*model.User, *model.AppError) {
+	if user, err := a.GetUserByLTI(ltiUserID); err == nil {
+		return user, nil
+	}
+	if user, err := a.GetUserByEmail(email); err == nil {
+		return user, nil
+	}
+	return nil, model.NewAppError("GetLTIUserByEmailOrID", "api.lti.get_user.not_found.app_error", nil, "", http.StatusNotFound)
+}

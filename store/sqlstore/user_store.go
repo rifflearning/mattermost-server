@@ -788,6 +788,20 @@ func (us SqlUserStore) GetByEmail(email string) store.StoreChannel {
 	})
 }
 
+func (us SqlUserStore) GetByLTI(ltiUserID string) store.StoreChannel {
+	return store.Do(func(result *store.StoreResult) {
+		ltiUserID = strings.ToLower(ltiUserID)
+
+		user := model.User{}
+
+		if err := us.GetReplica().SelectOne(&user, "SELECT * FROM Users WHERE Props LIKE CONCAT('%\"', :LtiUserIDProp,'\":\"', :UserID, '\"%')", map[string]interface{}{"LtiUserIDProp": model.LTI_USER_ID_PROP_KEY, "UserID": ltiUserID}); err != nil {
+			result.Err = model.NewAppError("SqlUserStore.GetByLTI", store.MISSING_LTI_ACCOUNT_ERROR, nil, "ltiUserID="+ltiUserID+", "+err.Error(), http.StatusBadRequest)
+		}
+
+		result.Data = &user
+	})
+}
+
 func (us SqlUserStore) GetByAuth(authData *string, authService string) store.StoreChannel {
 	return store.Do(func(result *store.StoreResult) {
 		if authData == nil || *authData == "" {
