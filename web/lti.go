@@ -7,7 +7,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"net/http"
-	"net/url"
 	"strconv"
 	"time"
 
@@ -36,13 +35,13 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// printing launch data for debugging purposes
-	body := make(map[string]string)
+	launchData := make(map[string]string)
 	for k, v := range r.Form {
-		body[k] = v[0]
+		launchData[k] = v[0]
 	}
 
-	mlog.Debug("LTI Launch Data", mlog.String("URL", c.GetSiteURLHeader()+c.Path), mlog.Any("Body", body))
+	// printing launch data for debugging purposes
+	mlog.Debug("LTI Launch Data", mlog.String("URL", c.GetSiteURLHeader()+c.Path), mlog.Any("Body", launchData))
 
 	mlog.Debug("Validate LTI request. LTI Signature Validation enabled: " + strconv.FormatBool(c.App.Config().LTISettings.EnableSignatureValidation))
 	consumerKey := r.FormValue("oauth_consumer_key")
@@ -57,7 +56,7 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := setLTIDataCookie(c, w, r); err != nil {
+	if err := setLTIDataCookie(c, w, launchData); err != nil {
 		c.Err = err
 		return
 	}
@@ -66,18 +65,8 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, c.GetSiteURLHeader()+"/signup_lti", http.StatusFound)
 }
 
-func encodeLTIRequest(v url.Values) (string, *model.AppError) {
-	if v == nil {
-		mlog.Error("The LTI request form data to be encoded is empty.")
-		return "", model.NewAppError("encodeLTIRequest", "api.lti.login.encoding.app_error", nil, "", http.StatusBadRequest)
-	}
-
-	form := make(map[string]string)
-	for key, value := range v {
-		form[key] = value[0]
-	}
-
-	res, err := json.Marshal(form)
+func encodeLTIRequest(launchData map[string]string) (string, *model.AppError) {
+	res, err := json.Marshal(launchData)
 	if err != nil {
 		mlog.Error("Error in json.Marshal: " + err.Error())
 		return "", model.NewAppError("encodeLTIRequest", "api.lti.login.marshalling.app_error", nil, "", http.StatusBadRequest)
@@ -86,12 +75,8 @@ func encodeLTIRequest(v url.Values) (string, *model.AppError) {
 	return base64.StdEncoding.EncodeToString([]byte(string(res))), nil
 }
 
-func setLTIDataCookie(c *Context, w http.ResponseWriter, r *http.Request) *model.AppError {
-	if err := r.ParseForm(); err != nil {
-		return model.NewAppError("loginWithLTI", "api.lti.login.parse.app_error", nil, "", http.StatusBadRequest)
-	}
-
-	encodedRequest, appError := encodeLTIRequest(r.Form)
+func setLTIDataCookie(c *Context, w http.ResponseWriter, launchData map[string]string) *model.AppError {
+	encodedRequest, appError := encodeLTIRequest(launchData)
 	if appError != nil {
 		return appError
 	}

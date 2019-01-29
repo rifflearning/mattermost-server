@@ -1217,10 +1217,6 @@
     "translation": "There was an error with LTI login attempt. Please try again or contact your system administrator. Error code LTI-03"
   },
   {
-    "id": "api.lti.login.encoding.app_error",
-    "translation": "There was an error with LTI login attempt. Please try again or contact your system administrator. Error code LTI-04"
-  },
-  {
     "id": "api.lti.login.marshalling.app_error",
     "translation": "There was an error with LTI login attempt. Please try again or contact your system administrator. Error code LTI-05"
   },
