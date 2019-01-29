@@ -33,6 +33,7 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		mlog.Error("Error occurred while parsing submitted form: " + err.Error())
 		c.Err = model.NewAppError("loginWithLTI", "api.lti.login.parse.app_error", nil, "", http.StatusBadRequest)
+		return
 	}
 
 	// printing launch data for debugging purposes

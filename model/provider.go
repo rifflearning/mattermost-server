@@ -119,7 +119,7 @@ func (p *Provider) Empty(key string) bool {
 	return p.values.Get(key) == ""
 }
 
-// Sign a request, adding, required fields,
+// Sign a request, adding required fields,
 // A request, can be drilled on a template, iterating, over p.Params()
 func (p *Provider) Sign() (string, error) {
 	if p.Empty("oauth_version") {
