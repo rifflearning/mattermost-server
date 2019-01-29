@@ -67,7 +67,7 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := c.App.OnboardLMSUser(user.Id, lms, ltiLaunchData); err != nil {
+	if err := c.App.OnboardLTIUser(user.Id, lms, ltiLaunchData, true); err != nil {
 		c.Err = err
 		return
 	}

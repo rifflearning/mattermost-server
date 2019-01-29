@@ -43,7 +43,7 @@ func TestApp_OnboardLMSUser(t *testing.T) {
 		"plg_name_property": "Channel Display Name",
 	}
 
-	err := th.App.OnboardLMSUser(user.Id, lms, launchData)
+	err := th.App.OnboardLTIUser(user.Id, lms, launchData, true)
 	assert.Nil(t, err)
 
 	lmsChannel, err := th.App.GetChannelByName("channel_slug", th.BasicTeam.Id, false)

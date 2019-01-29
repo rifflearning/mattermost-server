@@ -30,12 +30,14 @@ type LMS interface {
 	GetType() string
 	GetOAuthConsumerKey() string
 	GetOAuthConsumerSecret() string
+	GetUserId(launchData map[string]string) string
 	ValidateLTIRequest(url string, request *http.Request) bool
 	BuildUser(launchData map[string]string, password string) *User
 	GetTeam(launchData map[string]string) string
 	GetPublicChannelsToJoin(launchData map[string]string) map[string]string
 	GetPrivateChannelsToJoin(launchData map[string]string) map[string]string
 	GetChannel(launchData map[string]string) (string, *AppError)
+	SyncUser(user *User, launchData map[string]string) *User
 }
 
 type LTISettings struct {
