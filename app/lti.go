@@ -20,7 +20,7 @@ func (a *App) GetLMSToUse(consumerKey string) model.LMS {
 	return nil
 }
 
-func (a *App) OnboardLTIUser(userId string, lms model.LMS, launchData map[string]string, joinChannels bool) *model.AppError {
+func (a *App) OnboardLTIUser(userId string, lms model.LMS, launchData map[string]string) *model.AppError {
 	teamName := lms.GetTeam(launchData)
 	if err := a.addTeamMemberIfRequired(userId, teamName); err != nil {
 		return err
@@ -32,12 +32,10 @@ func (a *App) OnboardLTIUser(userId string, lms model.LMS, launchData map[string
 	}
 
 	publicChannels := a.createChannelsIfRequired(team.Id, lms.GetPublicChannelsToJoin(launchData), model.CHANNEL_OPEN)
-	privateChannels := a.createChannelsIfRequired(team.Id, lms.GetPrivateChannelsToJoin(launchData), model.CHANNEL_PRIVATE)
+	a.joinChannelsIfRequired(userId, publicChannels)
 
-	if joinChannels {
-		a.joinChannelsIfRequired(userId, publicChannels)
-		a.joinChannelsIfRequired(userId, privateChannels)
-	}
+	privateChannels := a.createChannelsIfRequired(team.Id, lms.GetPrivateChannelsToJoin(launchData), model.CHANNEL_PRIVATE)
+	a.joinChannelsIfRequired(userId, privateChannels)
 
 	return nil
 }
@@ -49,6 +47,11 @@ func (a *App) PatchLTIUser(userId string, lms model.LMS, launchData map[string]s
 	}
 
 	user.Props[model.LTI_USER_ID_PROP_KEY] = lms.GetUserId(launchData)
+	user, err = a.UpdateUser(user, false)
+	if err != nil {
+		return nil, err
+	}
+
 	return user, nil
 }
 
@@ -65,7 +68,7 @@ func (a *App) SyncLTIUser(userId string, lms model.LMS, launchData map[string]st
 	}
 
 	// TODO: confirm if we need to re-join channels or not
-	if err := a.OnboardLTIUser(userId, lms, launchData, false); err != nil {
+	if err := a.OnboardLTIUser(userId, lms, launchData); err != nil {
 		return nil, err
 	}
 
