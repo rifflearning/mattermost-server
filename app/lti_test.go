@@ -60,3 +60,26 @@ func TestApp_OnboardLMSUser(t *testing.T) {
 	assert.Equal(t, lmsChannel.Id, member.ChannelId)
 
 }
+
+func TestApp_PatchLTIUser(t *testing.T) {
+	th := Setup().InitBasic()
+	defer th.TearDown()
+
+	user := th.BasicUser
+	_, ok := user.Props[model.LTI_USER_ID_PROP_KEY]
+	assert.False(t, ok)
+
+	lms := &model.EdxLMS{}
+	launchData := map[string]string {
+		"custom_user_id": "abc123",
+	}
+
+	patchedUser, err := th.App.PatchLTIUser(user.Id, lms, launchData)
+	assert.Nil(t, err)
+	assert.Equal(t, "abc123", patchedUser.Props[model.LTI_USER_ID_PROP_KEY])
+
+	// testing on already patched user
+	patchedUser, err = th.App.PatchLTIUser(user.Id, lms, launchData)
+	assert.Nil(t, err)
+	assert.Equal(t, "abc123", patchedUser.Props[model.LTI_USER_ID_PROP_KEY])
+}
