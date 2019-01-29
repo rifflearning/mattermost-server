@@ -57,6 +57,7 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	c.Logout(w, r)
 	if err := setLTIDataCookie(c, w, r); err != nil {
 		c.Err = err
 		return
