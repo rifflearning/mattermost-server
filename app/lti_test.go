@@ -83,3 +83,52 @@ func TestApp_PatchLTIUser(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "abc123", patchedUser.Props[model.LTI_USER_ID_PROP_KEY])
 }
+
+func TestApp_SyncLTIUser(t *testing.T) {
+	th := Setup().InitBasic()
+	defer th.TearDown()
+
+	lms := &model.EdxLMS {
+		Name: "LMS_Name",
+		Type: "edx",
+		OAuthConsumerKey: "consumer_key",
+		OAuthConsumerSecret: "consumer_secret",
+		Teams: map[string]string{
+			"context_id_1": th.BasicTeam.Name,
+		},
+		PersonalChannels: model.EdxPersonalChannels {
+			Type: "type",
+			ChannelList: map[string]model.EdxChannel {
+				"plg": {
+					IdProperty: "plg_id_property",
+					NameProperty: "plg_name_property",
+				},
+				"capstone": {
+					IdProperty: "capstone_id_property",
+					NameProperty: "capstone_name_property",
+				},
+			},
+		},
+		DefaultChannels: map[string]model.EdxDefaultChannel {
+
+		},
+	}
+
+	launchData := map[string]string {
+		"context_id": "context_id_1",
+		"plg_id_property": "channel_slug",
+		"plg_name_property": "Channel Display Name",
+		"lis_person_contact_email_primary": "foo@example.com",
+		"lis_person_sourcedid": "lti_username",
+		"roles": "lti_roles",
+		"custom_user_id": "lti_user_id",
+	}
+
+	user := th.BasicUser
+	syncedUser, err := th.App.SyncLTIUser(user.Id, lms, launchData)
+	assert.Nil(t, err)
+	assert.Equal(t, "foo@example.com", syncedUser.Email)
+	assert.Equal(t, "lti_username", syncedUser.Username)
+	assert.Equal(t, "lti_roles", syncedUser.Position)
+	assert.Equal(t, "lti_user_id", syncedUser.Props[model.LTI_USER_ID_PROP_KEY])
+}
