@@ -80,7 +80,6 @@ func (e *EdxLMS) BuildUser(launchData map[string]string, password string) *User 
 		LastName:  launchData[launchDataLastNameKey],
 		Password:  password,
 	}
-
 	return e.SyncUser(user, launchData)
 }
 
