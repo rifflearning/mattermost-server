@@ -6,7 +6,6 @@ package web
 import (
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -63,7 +62,7 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mlog.Debug("Redirecting to: " + c.GetSiteURLHeader()+"/signup_lti")
+	mlog.Debug("Redirecting to: " + c.GetSiteURLHeader() + "/signup_lti")
 	http.Redirect(w, r, c.GetSiteURLHeader()+"/signup_lti", http.StatusFound)
 }
 
