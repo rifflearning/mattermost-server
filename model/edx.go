@@ -62,22 +62,21 @@ func (e *EdxLMS) GetOAuthConsumerSecret() string {
 	return e.OAuthConsumerSecret
 }
 
+func (e *EdxLMS) GetUserId(launchData map[string]string) string {
+	return launchData[launchDataLTIUserIdKey]
+}
+
 func (e *EdxLMS) ValidateLTIRequest(url string, request *http.Request) bool {
 	return baseValidateLTIRequest(e.OAuthConsumerSecret, e.OAuthConsumerKey, url, request)
 }
 
 func (e *EdxLMS) BuildUser(launchData map[string]string, password string) *User {
-	return &User{
-		Email:     launchData[launchDataEmailKey],
-		Username:  transformLTIUsername(launchData[launchDataUsernameKey]),
+	user := &User{
 		FirstName: launchData[launchDataFirstNameKey],
 		LastName:  launchData[launchDataLastNameKey],
-		Position:  launchData[launchDataPositionKey],
 		Password:  password,
-		Props: StringMap{
-			LTI_USER_ID_PROP_KEY: launchData[launchDataLTIUserIdKey],
-		},
 	}
+	return e.SyncUser(user, launchData)
 }
 
 func (e *EdxLMS) GetTeam(launchData map[string]string) string {
@@ -128,4 +127,17 @@ func (e *EdxLMS) GetChannel(launchData map[string]string) (string, *AppError) {
 	}
 
 	return channelSlug, nil
+}
+
+func (e *EdxLMS) SyncUser(user *User, launchData map[string]string) *User {
+	user.Email = launchData[launchDataEmailKey]
+	user.Username = transformLTIUsername(launchData[launchDataUsernameKey])
+	user.Position = launchData[launchDataPositionKey]
+
+	if user.Props == nil {
+		user.Props = StringMap{}
+	}
+
+	user.Props[LTI_USER_ID_PROP_KEY] = e.GetUserId(launchData)
+	return user
 }
