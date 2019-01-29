@@ -75,17 +75,13 @@ func (e *EdxLMS) ValidateLTIRequest(url string, request *http.Request) bool {
 }
 
 func (e *EdxLMS) BuildUser(launchData map[string]string, password string) *User {
-	return &User{
-		Email:     e.GetEmail(launchData),
-		Username:  transformLTIUsername(launchData[launchDataUsernameKey]),
+	user := &User{
 		FirstName: launchData[launchDataFirstNameKey],
 		LastName:  launchData[launchDataLastNameKey],
-		Position:  launchData[launchDataPositionKey],
 		Password:  password,
-		Props: StringMap{
-			LTI_USER_ID_PROP_KEY: e.GetUserId(launchData),
-		},
 	}
+
+	return e.SyncUser(user, launchData)
 }
 
 func (e *EdxLMS) GetTeam(launchData map[string]string) string {
@@ -136,4 +132,17 @@ func (e *EdxLMS) GetChannel(launchData map[string]string) (string, *AppError) {
 	}
 
 	return channelSlug, nil
+}
+
+func (e *EdxLMS) SyncUser(user *User, launchData map[string]string) *User {
+	user.Email = launchData[launchDataEmailKey]
+	user.Username = transformLTIUsername(launchData[launchDataUsernameKey])
+	user.Position = launchData[launchDataPositionKey]
+
+	if user.Props == nil {
+		user.Props = StringMap{}
+	}
+
+	user.Props[LTI_USER_ID_PROP_KEY] = e.GetUserId(launchData)
+	return user
 }
