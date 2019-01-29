@@ -1061,14 +1061,9 @@ func logout(c *Context, w http.ResponseWriter, r *http.Request) {
 }
 
 func Logout(c *Context, w http.ResponseWriter, r *http.Request) {
-	c.LogAudit("")
-	c.RemoveSessionCookie(w, r)
-	if c.Session.Id != "" {
-		if err := c.App.RevokeSessionById(c.Session.Id); err != nil {
-			c.Err = err
-			return
-		}
-	}
+	// Note: Implementation moved to c.Logout() to use in web package
+	// If the implementation here changes, keep the other one in sync
+	c.Logout(w, r)
 
 	ReturnStatusOK(w)
 }
