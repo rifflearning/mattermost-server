@@ -74,6 +74,26 @@ func (a *App) SyncLTIUser(userId string, lms model.LMS, launchData map[string]st
 	return user, nil
 }
 
+func (a *App) GetUserByLTI(ltiUserID string) (*model.User, *model.AppError) {
+	if result := <-a.Srv.Store.User().GetByLTI(ltiUserID); result.Err != nil {
+		return nil, result.Err
+	} else {
+		return result.Data.(*model.User), nil
+	}
+}
+
+// GetLTIUser can be used to get an LTI user by lti user id or email
+func (a *App) GetLTIUser(ltiUserID, email string) (*model.User, *model.AppError) {
+	user, err := a.GetUserByLTI(ltiUserID)
+	if err != nil {
+		user, err = a.GetUserByEmail(email)
+	}
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
 func (a *App) createChannelsIfRequired(teamId string, channels map[string]string, channelType string) model.ChannelList {
 	var channelList model.ChannelList
 	for slug, displayName := range channels {
@@ -129,24 +149,4 @@ func (a *App) addTeamMemberIfRequired(userId string, teamName string) *model.App
 	}
 
 	return nil
-}
-
-func (a *App) GetUserByLTI(ltiUserID string) (*model.User, *model.AppError) {
-	if result := <-a.Srv.Store.User().GetByLTI(ltiUserID); result.Err != nil {
-		return nil, result.Err
-	} else {
-		return result.Data.(*model.User), nil
-	}
-}
-
-// GetLTIUser can be used to get an LTI user by lti user id or email
-func (a *App) GetLTIUser(ltiUserID, email string) (*model.User, *model.AppError) {
-	user, err := a.GetUserByLTI(ltiUserID)
-	if err != nil {
-		user, err = a.GetUserByEmail(email)
-	}
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
 }

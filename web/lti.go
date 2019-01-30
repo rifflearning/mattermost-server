@@ -6,6 +6,7 @@ package web
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -143,7 +144,7 @@ func setLTIDataCookie(c *Context, w http.ResponseWriter, launchData map[string]s
 	return nil
 }
 
-func FinishLTILogin(c *Context, w http.ResponseWriter, r *http.Request, user *model.User) *model.AppError {
+func FinishLTILogin(c *Context, w http.ResponseWriter, r *http.Request, user *model.User, lms model.LMS, launchData map[string]string) *model.AppError {
 	session, err := c.App.DoLogin(w, r, user, "")
 	if err != nil {
 		return model.NewAppError("FinishLTILogin", "web.lti.login.login_user.app_error", nil, "", err.StatusCode)
@@ -151,7 +152,25 @@ func FinishLTILogin(c *Context, w http.ResponseWriter, r *http.Request, user *mo
 
 	c.Session = *session
 
-	// todo: redirect to channel instead
-	http.Redirect(w, r, c.GetSiteURLHeader(), http.StatusFound)
+	redirectUrl := getRedirectUrl(lms, launchData, c.App.GetConfig())
+	http.Redirect(w, r, redirectUrl, http.StatusFound)
 	return nil
+}
+
+func getRedirectUrl(lms model.LMS, launchData map[string]string, conf *model.Config) string {
+	var redirectUrl string
+	teamSlug := lms.GetTeam(launchData)
+	channelSlug, err := lms.GetChannel(launchData)
+	if err != nil {
+		mlog.Error("Error occurred searching for channel to redirect to. Continuing to Mattermost homepage. Error: " +err.Error())
+	}
+
+	if channelSlug == "" {
+		// redirect to Mattermost homepage
+		redirectUrl = *conf.ServiceSettings.SiteURL
+	} else {
+		redirectUrl = fmt.Sprintf("%s/%s/channels/%s", *conf.ServiceSettings.SiteURL, teamSlug, channelSlug)
+	}
+
+	return redirectUrl
 }
