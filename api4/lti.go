@@ -82,6 +82,7 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	c.Logout(w, r)
 	if err := web.FinishLTILogin(c, w, r, user, lms, ltiLaunchData); err != nil {
 		c.Err = err
 		return
