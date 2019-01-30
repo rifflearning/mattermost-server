@@ -99,6 +99,9 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		c.Err = err
 		return
 	}
+
+	redirectUrl := GetRedirectUrl(lms, launchData, c.GetSiteURLHeader())
+	http.Redirect(w, r, redirectUrl, http.StatusFound)
 }
 
 func FinishLTILogin(c *Context, w http.ResponseWriter, r *http.Request, user *model.User, lms model.LMS, launchData map[string]string) *model.AppError {
@@ -108,10 +111,25 @@ func FinishLTILogin(c *Context, w http.ResponseWriter, r *http.Request, user *mo
 	}
 
 	c.Session = *session
-
-	redirectUrl := getRedirectUrl(lms, launchData, c.GetSiteURLHeader())
-	http.Redirect(w, r, redirectUrl, http.StatusFound)
 	return nil
+}
+
+func GetRedirectUrl(lms model.LMS, launchData map[string]string, siteURL string) string {
+	var redirectUrl string
+	teamSlug := lms.GetTeam(launchData)
+	channelSlug, err := lms.GetChannel(launchData)
+	if err != nil {
+		mlog.Error("Error occurred searching for channel to redirect to. Continuing to Mattermost homepage. Error: " +err.Error())
+	}
+
+	if channelSlug == "" {
+		// redirect to Mattermost homepage
+		redirectUrl = siteURL
+	} else {
+		redirectUrl = fmt.Sprintf("%s/%s/channels/%s", siteURL, teamSlug, channelSlug)
+	}
+
+	return redirectUrl
 }
 
 func getLTILaunchData(c *Context, r *http.Request) (map[string]string, *model.AppError) {
@@ -162,22 +180,4 @@ func setLTIDataCookie(c *Context, w http.ResponseWriter, launchData map[string]s
 
 	http.SetCookie(w, cookie)
 	return nil
-}
-
-func getRedirectUrl(lms model.LMS, launchData map[string]string, siteURL string) string {
-	var redirectUrl string
-	teamSlug := lms.GetTeam(launchData)
-	channelSlug, err := lms.GetChannel(launchData)
-	if err != nil {
-		mlog.Error("Error occurred searching for channel to redirect to. Continuing to Mattermost homepage. Error: " +err.Error())
-	}
-
-	if channelSlug == "" {
-		// redirect to Mattermost homepage
-		redirectUrl = siteURL
-	} else {
-		redirectUrl = fmt.Sprintf("%s/%s/channels/%s", siteURL, teamSlug, channelSlug)
-	}
-
-	return redirectUrl
 }

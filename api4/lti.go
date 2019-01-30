@@ -82,10 +82,14 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	c.Logout(w, r)
 	if err := web.FinishLTILogin(c, w, r, user, lms, ltiLaunchData); err != nil {
 		c.Err = err
 		return
 	}
+
+	redirectUrl := web.GetRedirectUrl(lms, ltiLaunchData, c.GetSiteURLHeader())
+	w.Write([]byte(model.MapToJson(map[string]string{"redirect": redirectUrl})))
 }
 
 func addLaunchDataToForm(ltiLaunchData map[string]string, request *http.Request) *http.Request {
