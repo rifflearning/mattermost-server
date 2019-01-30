@@ -132,11 +132,7 @@ func (a *App) addTeamMemberIfRequired(userId string, teamName string) *model.App
 }
 
 func (a *App) GetUserByLTI(ltiUserID string) (*model.User, *model.AppError) {
-	if result := <-a.Srv.Store.User().GetByLTI(ltiUserID); result.Err != nil && result.Err.Id == "store.sql_user.get_by_lti.missing_account.app_error" {
-		result.Err.StatusCode = http.StatusNotFound
-		return nil, result.Err
-	} else if result.Err != nil {
-		result.Err.StatusCode = http.StatusBadRequest
+	if result := <-a.Srv.Store.User().GetByLTI(ltiUserID); result.Err != nil {
 		return nil, result.Err
 	} else {
 		return result.Data.(*model.User), nil
