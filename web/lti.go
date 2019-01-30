@@ -54,7 +54,7 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	user := c.App.GetLTIUser(ltiUserID, email)
 	if user == nil {
 		// Case: MM or LTI User not found
-		mlog.Debug("MM or LTI MM User not found")
+		mlog.Debug("MM or LTI User not found")
 		c.Logout(w, r)
 		if err := setLTIDataCookie(c, w, launchData); err != nil {
 			c.Err = err
