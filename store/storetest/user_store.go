@@ -1038,12 +1038,12 @@ func testUserStoreGetByLTI(t *testing.T, ss store.Store) {
 	u1 := &model.User{}
 	u1.Email = MakeEmail()
 	u1.Props = model.StringMap{
-		model.LTI_USER_ID_PROP_KEY: "a",
+		model.LTI_USER_ID_PROP_KEY: model.NewId(),
 	}
 	store.Must(ss.User().Save(u1))
 	store.Must(ss.Team().SaveMember(&model.TeamMember{TeamId: teamid, UserId: u1.Id}, -1))
 
-	if err := (<-ss.User().GetByLTI("a")).Err; err != nil {
+	if err := (<-ss.User().GetByLTI(u1.Props[model.LTI_USER_ID_PROP_KEY])).Err; err != nil {
 		t.Fatal(err)
 	}
 
