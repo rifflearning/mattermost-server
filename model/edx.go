@@ -163,9 +163,17 @@ func (e *EdxLMS) GetChannel(launchData map[string]string) (string, *AppError) {
 }
 
 func (e *EdxLMS) SyncUser(user *User, launchData map[string]string) *User {
-	user.Email = launchData[launchDataEmailKey]
-	user.Username = transformLTIUsername(launchData[launchDataUsernameKey])
-	user.Position = launchData[launchDataPositionKey]
+	if launchData[launchDataEmailKey] != "" {
+		user.Email = launchData[launchDataEmailKey]
+	}
+
+	if launchData[launchDataUsernameKey] != "" {
+		user.Username = transformLTIUsername(launchData[launchDataUsernameKey])
+	}
+
+	if launchData[launchDataPositionKey] != "" {
+		user.Position = launchData[launchDataPositionKey]
+	}
 
 	if user.Props == nil {
 		user.Props = StringMap{}
