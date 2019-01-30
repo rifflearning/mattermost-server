@@ -1281,6 +1281,30 @@
     "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-19"
   },
   {
+    "id": "edx.build_user.first_name_missing",
+    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-20"
+  },
+  {
+    "id": "edx.build_user.last_name_missing",
+    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-21"
+  },
+  {
+    "id": "edx.build_user.email_missing",
+    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-23"
+  },
+  {
+    "id": "edx.build_user.username_missing",
+    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-24"
+  },
+  {
+    "id": "edx.build_user.lti_user_id_missing",
+    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-25"
+  },
+  {
+    "id": "api.lti.signup.user_creation.app_error",
+    "translation": "There was an error with LTI signup attempt. Please try again or contact your system administrator. Error code LTI-26"
+  },
+  {
     "id": "api.oauth.allow_oauth.redirect_callback.app_error",
     "translation": "invalid_request: Supplied redirect_uri did not match registered callback_url"
   },

@@ -74,13 +74,42 @@ func (e *EdxLMS) ValidateLTIRequest(url string, request *http.Request) bool {
 	return baseValidateLTIRequest(e.OAuthConsumerSecret, e.OAuthConsumerKey, url, request)
 }
 
-func (e *EdxLMS) BuildUser(launchData map[string]string, password string) *User {
+func (e *EdxLMS) BuildUser(launchData map[string]string, password string) (*User, *AppError) {
+	//checking if all required fields are present
+	if launchData[launchDataFirstNameKey] == "" {
+		return nil, NewAppError("Edx_BuildUser", "edx.build_user.first_name_missing", nil, "", http.StatusBadRequest)
+	}
+
+	if launchData[launchDataLastNameKey] == "" {
+		return nil, NewAppError("Edx_BuildUser", "edx.build_user.last_name_missing", nil, "", http.StatusBadRequest)
+	}
+
+	if launchData[launchDataEmailKey] == "" {
+		return nil, NewAppError("Edx_BuildUser", "edx.build_user.email_missing", nil, "", http.StatusBadRequest)
+	}
+
+	if launchData[launchDataUsernameKey] == "" {
+		return nil, NewAppError("Edx_BuildUser", "edx.build_user.username_missing", nil, "", http.StatusBadRequest)
+	}
+
+	props := StringMap{}
+	props[LTI_USER_ID_PROP_KEY] = e.GetUserId(launchData)
+
+	if props[LTI_USER_ID_PROP_KEY] == "" {
+		return nil, NewAppError("Edx_BuildUser", "edx.build_user.lti_user_id_missing", nil, "", http.StatusBadRequest)
+	}
+
 	user := &User{
 		FirstName: launchData[launchDataFirstNameKey],
 		LastName:  launchData[launchDataLastNameKey],
+		Email: launchData[launchDataEmailKey],
+		Username: transformLTIUsername(launchData[launchDataUsernameKey]),
+		Position: launchData[launchDataPositionKey],
 		Password:  password,
+		Props: props,
 	}
-	return e.SyncUser(user, launchData)
+
+	return user, nil
 }
 
 func (e *EdxLMS) GetTeam(launchData map[string]string) string {
