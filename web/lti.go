@@ -53,7 +53,8 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 
 	user := c.App.GetLTIUser(ltiUserID, email)
 	if user == nil {
-		// Case: User not found
+		// Case: MM or LTI User not found
+		mlog.Debug("MM or LTI MM User not found")
 		c.Logout(w, r)
 		if err := setLTIDataCookie(c, w, launchData); err != nil {
 			c.Err = err
@@ -66,10 +67,12 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	if user.Email == email {
 		if customID, ok := user.Props[model.LTI_USER_ID_PROP_KEY]; ok && customID != ltiUserID {
 			// Case: MM User linked to different LTI user
+			mlog.Debug("MM User linked to different LTI user")
 			c.Err = model.NewAppError("LoginLTIUser", "web.lti.login.cross_linked_users.app_error", nil, "", http.StatusBadRequest)
 			return
 		} else if !ok || customID == "" {
 			// Case: MM User found by email but not linked to any lti user
+			mlog.Debug("MM User found by email but not linked to any lti user")
 			user, err = c.App.PatchLTIUser(user.Id, lms, launchData)
 			if err != nil {
 				c.Err = model.NewAppError("LoginLTIUser", "web.lti.login.patch_user.app_error", nil, "", err.StatusCode)
@@ -83,6 +86,7 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	mlog.Debug("Logging in the user")
 	user, err = c.App.SyncLTIUser(user.Id, lms, launchData)
 	if err != nil {
 		c.Err = model.NewAppError("LoginLTIUser", "web.lti.login.sync_user.app_error", nil, "", err.StatusCode)
@@ -126,6 +130,7 @@ func getLTILaunchData(c *Context, r *http.Request) (map[string]string, *model.Ap
 }
 
 func encodeLTIRequest(launchData map[string]string) (string, *model.AppError) {
+	mlog.Debug("Encoding LTI launch data")
 	res, err := json.Marshal(launchData)
 	if err != nil {
 		mlog.Error("Error in json.Marshal: " + err.Error())
@@ -136,6 +141,7 @@ func encodeLTIRequest(launchData map[string]string) (string, *model.AppError) {
 }
 
 func setLTIDataCookie(c *Context, w http.ResponseWriter, launchData map[string]string) *model.AppError {
+	mlog.Debug("Setting LTI launch data cookie")
 	encodedRequest, appError := encodeLTIRequest(launchData)
 	if appError != nil {
 		return appError
