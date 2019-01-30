@@ -83,15 +83,16 @@ func (a *App) GetUserByLTI(ltiUserID string) (*model.User, *model.AppError) {
 }
 
 // GetLTIUser can be used to get an LTI user by lti user id or email
-func (a *App) GetLTIUser(ltiUserID, email string) (*model.User, *model.AppError) {
+func (a *App) GetLTIUser(ltiUserID, email string) *model.User {
 	user, err := a.GetUserByLTI(ltiUserID)
 	if err != nil {
 		user, err = a.GetUserByEmail(email)
 	}
 	if err != nil {
-		return nil, err
+		// return nil if the user is not found by email or LTI prop
+		return nil
 	}
-	return user, nil
+	return user
 }
 
 func (a *App) createChannelsIfRequired(teamId string, channels map[string]string, channelType string) model.ChannelList {

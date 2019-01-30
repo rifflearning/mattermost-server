@@ -51,8 +51,8 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	ltiUserID := lms.GetUserId(launchData)
 	email := lms.GetEmail(launchData)
 
-	user, err := c.App.GetLTIUser(ltiUserID, email)
-	if err != nil {
+	user := c.App.GetLTIUser(ltiUserID, email)
+	if user == nil {
 		// Case: User not found
 		c.Logout(w, r)
 		if err := setLTIDataCookie(c, w, launchData); err != nil {
@@ -90,16 +90,29 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	}
 
 	c.Logout(w, r)
-	if err := FinishLTILogin(c, w, r, user); err != nil {
+	if err := FinishLTILogin(c, w, r, user, lms, launchData); err != nil {
 		c.Err = err
 		return
 	}
 }
 
+func FinishLTILogin(c *Context, w http.ResponseWriter, r *http.Request, user *model.User, lms model.LMS, launchData map[string]string) *model.AppError {
+	session, err := c.App.DoLogin(w, r, user, "")
+	if err != nil {
+		return model.NewAppError("FinishLTILogin", "web.lti.login.login_user.app_error", nil, "", err.StatusCode)
+	}
+
+	c.Session = *session
+
+	redirectUrl := getRedirectUrl(lms, launchData, c.App.GetConfig())
+	http.Redirect(w, r, redirectUrl, http.StatusFound)
+	return nil
+}
+
 func getLTILaunchData(c *Context, r *http.Request) (map[string]string, *model.AppError) {
 	// to populate r.Form
 	if err := r.ParseForm(); err != nil {
-		return nil, model.NewAppError("loginWithLTI", "web.lti.login.parse.app_error", nil, "", http.StatusBadRequest)
+		return nil, model.NewAppError("getLTILaunchData", "web.lti.login.parse.app_error", nil, "", http.StatusBadRequest)
 	}
 
 	launchData := make(map[string]string)
@@ -141,19 +154,6 @@ func setLTIDataCookie(c *Context, w http.ResponseWriter, launchData map[string]s
 	}
 
 	http.SetCookie(w, cookie)
-	return nil
-}
-
-func FinishLTILogin(c *Context, w http.ResponseWriter, r *http.Request, user *model.User, lms model.LMS, launchData map[string]string) *model.AppError {
-	session, err := c.App.DoLogin(w, r, user, "")
-	if err != nil {
-		return model.NewAppError("FinishLTILogin", "web.lti.login.login_user.app_error", nil, "", err.StatusCode)
-	}
-
-	c.Session = *session
-
-	redirectUrl := getRedirectUrl(lms, launchData, c.App.GetConfig())
-	http.Redirect(w, r, redirectUrl, http.StatusFound)
 	return nil
 }
 
