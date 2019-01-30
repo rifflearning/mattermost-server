@@ -93,7 +93,6 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c.Logout(w, r)
 	if err := FinishLTILogin(c, w, r, user, lms, launchData); err != nil {
 		c.Err = err
 		return
