@@ -1043,8 +1043,13 @@ func testUserStoreGetByLTI(t *testing.T, ss store.Store) {
 	store.Must(ss.User().Save(u1))
 	store.Must(ss.Team().SaveMember(&model.TeamMember{TeamId: teamid, UserId: u1.Id}, -1))
 
-	if err := (<-ss.User().GetByLTI(u1.Props[model.LTI_USER_ID_PROP_KEY])).Err; err != nil {
-		t.Fatal(err)
+	if r := <-ss.User().GetByLTI(u1.Props[model.LTI_USER_ID_PROP_KEY]); r.Err != nil {
+		t.Fatal(r.Err)
+	} else {
+		user := r.Data.(*model.User)
+		if user.Email != u1.Email || user.Props[model.LTI_USER_ID_PROP_KEY] != u1.Props[model.LTI_USER_ID_PROP_KEY] {
+			t.Fatal("Received user should match u1")
+		}
 	}
 
 	if err := (<-ss.User().GetByLTI("")).Err; err == nil {

@@ -104,7 +104,7 @@ func FinishLTILogin(c *Context, w http.ResponseWriter, r *http.Request, user *mo
 
 	c.Session = *session
 
-	redirectUrl := getRedirectUrl(lms, launchData, c.App.GetConfig())
+	redirectUrl := getRedirectUrl(lms, launchData, c.GetSiteURLHeader())
 	http.Redirect(w, r, redirectUrl, http.StatusFound)
 	return nil
 }
@@ -157,7 +157,7 @@ func setLTIDataCookie(c *Context, w http.ResponseWriter, launchData map[string]s
 	return nil
 }
 
-func getRedirectUrl(lms model.LMS, launchData map[string]string, conf *model.Config) string {
+func getRedirectUrl(lms model.LMS, launchData map[string]string, siteURL string) string {
 	var redirectUrl string
 	teamSlug := lms.GetTeam(launchData)
 	channelSlug, err := lms.GetChannel(launchData)
@@ -167,9 +167,9 @@ func getRedirectUrl(lms model.LMS, launchData map[string]string, conf *model.Con
 
 	if channelSlug == "" {
 		// redirect to Mattermost homepage
-		redirectUrl = *conf.ServiceSettings.SiteURL
+		redirectUrl = siteURL
 	} else {
-		redirectUrl = fmt.Sprintf("%s/%s/channels/%s", *conf.ServiceSettings.SiteURL, teamSlug, channelSlug)
+		redirectUrl = fmt.Sprintf("%s/%s/channels/%s", siteURL, teamSlug, channelSlug)
 	}
 
 	return redirectUrl
