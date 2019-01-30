@@ -86,8 +86,6 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		c.Err = err
 		return
 	}
-
-	ReturnStatusOK(w)
 }
 
 func addLaunchDataToForm(ltiLaunchData map[string]string, request *http.Request) *http.Request {

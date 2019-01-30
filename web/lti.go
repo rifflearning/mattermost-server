@@ -60,6 +60,8 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 			c.Err = err
 			return
 		}
+
+		mlog.Debug("Redirecting to login page")
 		http.Redirect(w, r, c.GetSiteURLHeader()+"/signup_lti", http.StatusFound)
 		return
 	}
