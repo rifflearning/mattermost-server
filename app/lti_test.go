@@ -1,9 +1,13 @@
+// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
+// See License.txt for license information.
+
 package app
 
 import (
+	"testing"
+
 	"github.com/mattermost/mattermost-server/model"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestApp_OnboardLMSUser(t *testing.T) {
@@ -11,39 +15,37 @@ func TestApp_OnboardLMSUser(t *testing.T) {
 	defer th.TearDown()
 
 	user := th.BasicUser
-	lms := &model.EdxLMS {
-		Name: "LMS_Name",
-		Type: "edx",
-		OAuthConsumerKey: "consumer_key",
+	lms := &model.EdxLMS{
+		Name:                "LMS_Name",
+		Type:                "edx",
+		OAuthConsumerKey:    "consumer_key",
 		OAuthConsumerSecret: "consumer_secret",
 		Teams: map[string]string{
 			"context_id_1": th.BasicTeam.Name,
 		},
-		PersonalChannels: model.EdxPersonalChannels {
+		PersonalChannels: model.EdxPersonalChannels{
 			Type: "type",
-			ChannelList: map[string]model.EdxChannel {
+			ChannelList: map[string]model.EdxChannel{
 				"plg": {
-					IdProperty: "plg_id_property",
+					IdProperty:   "plg_id_property",
 					NameProperty: "plg_name_property",
 				},
 				"capstone": {
-					IdProperty: "capstone_id_property",
+					IdProperty:   "capstone_id_property",
 					NameProperty: "capstone_name_property",
 				},
 			},
 		},
-		DefaultChannels: map[string]model.EdxDefaultChannel {
-
-		},
+		DefaultChannels: map[string]model.EdxDefaultChannel{},
 	}
 
 	launchData := map[string]string{
-		"context_id": "context_id_1",
-		"plg_id_property": "channel_slug",
+		"context_id":        "context_id_1",
+		"plg_id_property":   "channel_slug",
 		"plg_name_property": "Channel Display Name",
 	}
 
-	err := th.App.OnboardLTIUser(user.Id, lms, launchData, true)
+	err := th.App.OnboardLTIUser(user.Id, lms, launchData)
 	assert.Nil(t, err)
 
 	lmsChannel, err := th.App.GetChannelByName("channel_slug", th.BasicTeam.Id, false)
@@ -70,7 +72,7 @@ func TestApp_PatchLTIUser(t *testing.T) {
 	assert.False(t, ok)
 
 	lms := &model.EdxLMS{}
-	launchData := map[string]string {
+	launchData := map[string]string{
 		"custom_user_id": "abc123",
 	}
 
@@ -88,40 +90,38 @@ func TestApp_SyncLTIUser(t *testing.T) {
 	th := Setup().InitBasic()
 	defer th.TearDown()
 
-	lms := &model.EdxLMS {
-		Name: "LMS_Name",
-		Type: "edx",
-		OAuthConsumerKey: "consumer_key",
+	lms := &model.EdxLMS{
+		Name:                "LMS_Name",
+		Type:                "edx",
+		OAuthConsumerKey:    "consumer_key",
 		OAuthConsumerSecret: "consumer_secret",
 		Teams: map[string]string{
 			"context_id_1": th.BasicTeam.Name,
 		},
-		PersonalChannels: model.EdxPersonalChannels {
+		PersonalChannels: model.EdxPersonalChannels{
 			Type: "type",
-			ChannelList: map[string]model.EdxChannel {
+			ChannelList: map[string]model.EdxChannel{
 				"plg": {
-					IdProperty: "plg_id_property",
+					IdProperty:   "plg_id_property",
 					NameProperty: "plg_name_property",
 				},
 				"capstone": {
-					IdProperty: "capstone_id_property",
+					IdProperty:   "capstone_id_property",
 					NameProperty: "capstone_name_property",
 				},
 			},
 		},
-		DefaultChannels: map[string]model.EdxDefaultChannel {
-
-		},
+		DefaultChannels: map[string]model.EdxDefaultChannel{},
 	}
 
-	launchData := map[string]string {
-		"context_id": "context_id_1",
-		"plg_id_property": "channel_slug",
-		"plg_name_property": "Channel Display Name",
+	launchData := map[string]string{
+		"context_id":                       "context_id_1",
+		"plg_id_property":                  "channel_slug",
+		"plg_name_property":                "Channel Display Name",
 		"lis_person_contact_email_primary": "foo@example.com",
-		"lis_person_sourcedid": "lti_username",
-		"roles": "lti_roles",
-		"custom_user_id": "lti_user_id",
+		"lis_person_sourcedid":             "lti_username",
+		"roles":                            "lti_roles",
+		"custom_user_id":                   "lti_user_id",
 	}
 
 	user := th.BasicUser

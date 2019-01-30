@@ -11,6 +11,7 @@ import (
 
 	"github.com/mattermost/mattermost-server/mlog"
 	"github.com/mattermost/mattermost-server/model"
+	"github.com/mattermost/mattermost-server/web"
 )
 
 func (api *API) InitLTI() {
@@ -60,7 +61,13 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 
 	// create user
 	props := model.MapFromJson(r.Body)
-	user := lms.BuildUser(ltiLaunchData, props["password"])
+	user, err := lms.BuildUser(ltiLaunchData, props["password"])
+	if err != nil {
+		mlog.Error("Error occurred while building user from launch data: " + err.Error())
+		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.user_creation.app_error", nil, "", http.StatusBadRequest)
+		return
+	}
+
 	user, appErr := c.App.CreateUser(user)
 	if appErr != nil {
 		mlog.Error("Error occurred while creating LTI user: " + appErr.Error())
@@ -68,7 +75,12 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := c.App.OnboardLTIUser(user.Id, lms, ltiLaunchData, true); err != nil {
+	if err := c.App.OnboardLTIUser(user.Id, lms, ltiLaunchData); err != nil {
+		c.Err = err
+		return
+	}
+
+	if err := web.FinishLTILogin(c, w, r, user, lms, ltiLaunchData); err != nil {
 		c.Err = err
 		return
 	}
