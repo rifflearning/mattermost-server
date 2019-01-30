@@ -6,6 +6,7 @@ package api4
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 
@@ -61,14 +62,15 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 
 	// create user
 	props := model.MapFromJson(r.Body)
-	user, err := lms.BuildUser(ltiLaunchData, props["password"])
-	if err != nil {
-		mlog.Error("Error occurred while building user from launch data: " + err.Error())
+	user, appErr := lms.BuildUser(ltiLaunchData, props["password"])
+	if appErr != nil {
+		fmt.Println(err)
+		mlog.Error("Error occurred while building user from launch data: " + appErr.Error())
 		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.user_creation.app_error", nil, "", http.StatusBadRequest)
 		return
 	}
 
-	user, appErr := c.App.CreateUser(user)
+	user, appErr = c.App.CreateUser(user)
 	if appErr != nil {
 		mlog.Error("Error occurred while creating LTI user: " + appErr.Error())
 		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.create_user.app_error", map[string]interface{}{"UserError": appErr.Message}, appErr.Error(), appErr.StatusCode)
