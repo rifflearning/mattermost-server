@@ -4,6 +4,7 @@
 package model
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 )
@@ -102,11 +103,11 @@ func (e *EdxLMS) BuildUser(launchData map[string]string, password string) (*User
 	user := &User{
 		FirstName: launchData[launchDataFirstNameKey],
 		LastName:  launchData[launchDataLastNameKey],
-		Email: launchData[launchDataEmailKey],
-		Username: transformLTIUsername(launchData[launchDataUsernameKey]),
-		Position: launchData[launchDataPositionKey],
+		Email:     launchData[launchDataEmailKey],
+		Username:  transformLTIUsername(launchData[launchDataUsernameKey]),
+		Position:  launchData[launchDataPositionKey],
 		Password:  password,
-		Props: props,
+		Props:     props,
 	}
 
 	return user, nil
@@ -125,9 +126,9 @@ func (e *EdxLMS) GetPublicChannelsToJoin(launchData map[string]string) map[strin
 func (e *EdxLMS) GetPrivateChannelsToJoin(launchData map[string]string) map[string]string {
 	channels := map[string]string{}
 
-	for _, channelConfig := range e.PersonalChannels.ChannelList {
+	for personalChannelName, channelConfig := range e.PersonalChannels.ChannelList {
 		channelDisplayName := launchData[channelConfig.NameProperty]
-		channelSlug := launchData[channelConfig.IdProperty]
+		channelSlug := fmt.Sprintf("%s-%s", personalChannelName, launchData[channelConfig.IdProperty])
 
 		if channelDisplayName != "" && channelSlug != "" {
 			channels[channelSlug] = channelDisplayName
@@ -154,7 +155,7 @@ func (e *EdxLMS) GetChannel(launchData map[string]string) (string, *AppError) {
 			return "", NewAppError("GetChannel", "get_channel.redirect_lookup_channel.not_found", nil, "", http.StatusBadRequest)
 		}
 
-		channelSlug = launchData[edxChannel.IdProperty]
+		channelSlug = fmt.Sprintf("%s-%s", components[1], launchData[edxChannel.IdProperty])
 	} else {
 
 	}
