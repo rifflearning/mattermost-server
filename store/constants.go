@@ -9,6 +9,7 @@ const (
 	CHANNEL_EXISTS_ERROR         = "store.sql_channel.save_channel.exists.app_error"
 
 	MISSING_ACCOUNT_ERROR      = "store.sql_user.missing_account.const"
+	MISSING_LTI_ACCOUNT_ERROR  = "store.sql_user.get_by_lti.missing_account.app_error"
 	MISSING_AUTH_ACCOUNT_ERROR = "store.sql_user.get_by_auth.missing_account.app_error"
 
 	USER_SEARCH_OPTION_NAMES_ONLY              = "names_only"

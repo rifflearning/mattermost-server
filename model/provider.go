@@ -45,7 +45,7 @@ const (
 //  sig, err := p.Sign()
 //
 // will sign the request, and add the needed fields to the
-// Provider.values > Can access it throught p.Params()
+// Provider.values > Can access it through p.Params()
 // It also can be used to Verify and handle, incoming LTI requests.
 //
 //  p.IsValid(request)
