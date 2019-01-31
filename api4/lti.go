@@ -66,7 +66,7 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	if appErr != nil {
 		fmt.Println(err)
 		mlog.Error("Error occurred while building user from launch data: " + appErr.Error())
-		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.user_creation.app_error", nil, "", http.StatusBadRequest)
+		c.Err = appErr
 		return
 	}
 
