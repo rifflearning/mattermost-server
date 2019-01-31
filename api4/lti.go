@@ -6,11 +6,13 @@ package api4
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 
 	"github.com/mattermost/mattermost-server/mlog"
 	"github.com/mattermost/mattermost-server/model"
+	"github.com/mattermost/mattermost-server/web"
 )
 
 func (api *API) InitLTI() {
@@ -48,6 +50,10 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	// validate launch data
 	consumerKey := ltiLaunchData["oauth_consumer_key"]
 	lms := c.App.GetLMSToUse(consumerKey)
+	if lms == nil {
+		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.no_lms_found", nil, "", http.StatusBadRequest)
+		return
+	}
 
 	if c.App.Config().LTISettings.EnableSignatureValidation && !lms.ValidateLTIRequest(c.GetSiteURLHeader()+"/login/lti", addLaunchDataToForm(ltiLaunchData, r)) {
 		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.validation.app_error", nil, "", http.StatusBadRequest)
@@ -56,19 +62,34 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 
 	// create user
 	props := model.MapFromJson(r.Body)
-	user := lms.BuildUser(ltiLaunchData, props["password"])
-	user, appErr := c.App.CreateUser(user)
-
+	user, appErr := lms.BuildUser(ltiLaunchData, props["password"])
 	if appErr != nil {
-		mlog.Error("Error occurred while creating LTI user: " + appErr.Error())
-		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.create_user.app_error", nil, appErr.Error(), appErr.StatusCode)
+		fmt.Println(err)
+		mlog.Error("Error occurred while building user from launch data: " + appErr.Error())
+		c.Err = appErr
 		return
 	}
 
-	// TODO: create required channels here
-	// TODO: add user to required channels here
+	user, appErr = c.App.CreateUser(user)
+	if appErr != nil {
+		mlog.Error("Error occurred while creating LTI user: " + appErr.Error())
+		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.create_user.app_error", map[string]interface{}{"UserError": appErr.Message}, appErr.Error(), appErr.StatusCode)
+		return
+	}
 
-	ReturnStatusOK(w)
+	if err := c.App.OnboardLTIUser(user.Id, lms, ltiLaunchData); err != nil {
+		c.Err = err
+		return
+	}
+
+	c.Logout(w, r)
+	if err := web.FinishLTILogin(c, w, r, user, lms, ltiLaunchData); err != nil {
+		c.Err = err
+		return
+	}
+
+	redirectUrl := web.GetRedirectUrl(lms, ltiLaunchData, c.GetSiteURLHeader())
+	w.Write([]byte(model.MapToJson(map[string]string{"redirect": redirectUrl})))
 }
 
 func addLaunchDataToForm(ltiLaunchData map[string]string, request *http.Request) *http.Request {

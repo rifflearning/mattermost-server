@@ -34,6 +34,7 @@ func TestUserStore(t *testing.T, ss store.Store) {
 	t.Run("GetProfilesByUsernames", func(t *testing.T) { testUserStoreGetProfilesByUsernames(t, ss) })
 	t.Run("GetSystemAdminProfiles", func(t *testing.T) { testUserStoreGetSystemAdminProfiles(t, ss) })
 	t.Run("GetByEmail", func(t *testing.T) { testUserStoreGetByEmail(t, ss) })
+	t.Run("GetByLTI", func(t *testing.T) { testUserStoreGetByLTI(t, ss) })
 	t.Run("GetByAuthData", func(t *testing.T) { testUserStoreGetByAuthData(t, ss) })
 	t.Run("GetByUsername", func(t *testing.T) { testUserStoreGetByUsername(t, ss) })
 	t.Run("GetForLogin", func(t *testing.T) { testUserStoreGetForLogin(t, ss) })
@@ -1028,6 +1029,31 @@ func testUserStoreGetByEmail(t *testing.T, ss store.Store) {
 
 	if err := (<-ss.User().GetByEmail("")).Err; err == nil {
 		t.Fatal("Should have failed because of missing email")
+	}
+}
+
+func testUserStoreGetByLTI(t *testing.T, ss store.Store) {
+	teamid := model.NewId()
+
+	u1 := &model.User{}
+	u1.Email = MakeEmail()
+	u1.Props = model.StringMap{
+		model.LTI_USER_ID_PROP_KEY: model.NewId(),
+	}
+	store.Must(ss.User().Save(u1))
+	store.Must(ss.Team().SaveMember(&model.TeamMember{TeamId: teamid, UserId: u1.Id}, -1))
+
+	if r := <-ss.User().GetByLTI(u1.Props[model.LTI_USER_ID_PROP_KEY]); r.Err != nil {
+		t.Fatal(r.Err)
+	} else {
+		user := r.Data.(*model.User)
+		if user.Email != u1.Email || user.Props[model.LTI_USER_ID_PROP_KEY] != u1.Props[model.LTI_USER_ID_PROP_KEY] {
+			t.Fatal("Received user should match u1")
+		}
+	}
+
+	if err := (<-ss.User().GetByLTI("")).Err; err == nil {
+		t.Fatal("Should have failed because of missing ltiUserID")
 	}
 }
 
