@@ -155,7 +155,7 @@ func (e *EdxLMS) GetChannel(launchData map[string]string) (string, *AppError) {
 			return "", NewAppError("GetChannel", "get_channel.redirect_lookup_channel.not_found", nil, "", http.StatusBadRequest)
 		}
 
-		channelSlug = launchData[edxChannel.IdProperty]
+		channelSlug = fmt.Sprintf("%s-%s", components[1], launchData[edxChannel.IdProperty])
 	} else {
 
 	}
