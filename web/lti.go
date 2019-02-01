@@ -56,6 +56,13 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		// Case: MM or LTI User not found
 		mlog.Debug("MM or LTI User not found")
 		c.Logout(w, r)
+
+		// Don't redirect to signup page if BuildUser is going to fail
+		if _, err := lms.BuildUser(launchData, ""); err != nil {
+			c.Err = err
+			return
+		}
+
 		if err := setLTIDataCookie(c, w, launchData); err != nil {
 			c.Err = err
 			return
