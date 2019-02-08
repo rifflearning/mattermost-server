@@ -17,6 +17,7 @@ const (
 	launchDataPositionKey        = "roles"
 	launchDataLTIUserIdKey       = "custom_user_id"
 	launchDataChannelRedirectKey = "custom_channel_redirect"
+	launchDataFullNameKey        = "lis_person_name_full"
 
 	redirectChannelLookupKeyword = "lookup"
 )
@@ -77,13 +78,6 @@ func (e *EdxLMS) ValidateLTIRequest(url string, request *http.Request) bool {
 
 func (e *EdxLMS) BuildUser(launchData map[string]string, password string) (*User, *AppError) {
 	//checking if all required fields are present
-	if launchData[launchDataFirstNameKey] == "" {
-		return nil, NewAppError("Edx_BuildUser", "edx.build_user.first_name_missing", nil, "", http.StatusBadRequest)
-	}
-
-	if launchData[launchDataLastNameKey] == "" {
-		return nil, NewAppError("Edx_BuildUser", "edx.build_user.last_name_missing", nil, "", http.StatusBadRequest)
-	}
 
 	if launchData[launchDataEmailKey] == "" {
 		return nil, NewAppError("Edx_BuildUser", "edx.build_user.email_missing", nil, "", http.StatusBadRequest)
@@ -100,9 +94,26 @@ func (e *EdxLMS) BuildUser(launchData map[string]string, password string) (*User
 		return nil, NewAppError("Edx_BuildUser", "edx.build_user.lti_user_id_missing", nil, "", http.StatusBadRequest)
 	}
 
+	firstName := strings.Trim(launchData[launchDataFirstNameKey], " ")
+	lastName := strings.Trim(launchData[launchDataLastNameKey], " ")
+
+	if firstName == "" && lastName == "" {
+		if strings.Trim(launchData[launchDataFullNameKey], " ") != "" {
+			name := strings.Split(strings.Trim(launchData[launchDataFullNameKey], " "), " ")
+			if len(name) == 1 {
+				firstName = name[0]
+			} else if len(name) > 1 {
+				firstName = name[0]
+				lastName = name[len(name) - 1]
+			}
+		} else {
+			firstName = launchData[launchDataLTIUserIdKey]
+		}
+	}
+
 	user := &User{
-		FirstName: launchData[launchDataFirstNameKey],
-		LastName:  launchData[launchDataLastNameKey],
+		FirstName: firstName,
+		LastName:  lastName,
 		Email:     launchData[launchDataEmailKey],
 		Username:  transformLTIUsername(launchData[launchDataUsernameKey]),
 		Position:  launchData[launchDataPositionKey],

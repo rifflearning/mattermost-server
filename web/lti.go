@@ -58,7 +58,7 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		c.Logout(w, r)
 
 		// Don't redirect to signup page if BuildUser is going to fail
-		if _, err := lms.BuildUser(launchData, ""); err != nil {
+		if user, err = lms.BuildUser(launchData, ""); err != nil {
 			c.Err = err
 			return
 		}
@@ -67,6 +67,8 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 			c.Err = err
 			return
 		}
+
+		setUserNameCookie(c, w, user.FirstName + " " + user.LastName)
 
 		mlog.Debug("Redirecting to login page")
 		http.Redirect(w, r, c.GetSiteURLHeader()+"/signup_lti", http.StatusFound)
@@ -187,4 +189,21 @@ func setLTIDataCookie(c *Context, w http.ResponseWriter, launchData map[string]s
 
 	http.SetCookie(w, cookie)
 	return nil
+}
+
+func setUserNameCookie(c *Context, w http.ResponseWriter, name string) {
+	maxAge := 600 // 10 minutes
+	expiresAt := time.Unix(model.GetMillis()/1000+int64(maxAge), 0)
+
+	cookie := &http.Cookie{
+		Name: model.LTI_NAME_COOKIE,
+		Value: base64.StdEncoding.EncodeToString([]byte(name)),
+		Path: "/",
+		MaxAge: maxAge,
+		Expires: expiresAt,
+		Domain: c.App.GetCookieDomain(),
+		HttpOnly: false,
+	}
+
+	http.SetCookie(w, cookie)
 }
