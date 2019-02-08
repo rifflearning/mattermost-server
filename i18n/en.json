@@ -1281,14 +1281,6 @@
     "translation": "LTI-19: Failed to login user."
   },
   {
-    "id": "edx.build_user.first_name_missing",
-    "translation": "LTI-20: LTI Launch Data is missing First Name."
-  },
-  {
-    "id": "edx.build_user.last_name_missing",
-    "translation": "LTI-21: LTI Launch Data is missing Last Name."
-  },
-  {
     "id": "edx.build_user.email_missing",
     "translation": "LTI-23: LTI Launch Data is missing Email."
   },
