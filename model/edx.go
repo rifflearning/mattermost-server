@@ -98,15 +98,13 @@ func (e *EdxLMS) BuildUser(launchData map[string]string, password string) (*User
 	lastName := strings.Trim(launchData[launchDataLastNameKey], " ")
 
 	if firstName == "" || lastName == "" {
-		name := strings.Split(strings.Trim(launchData[launchDataFullNameKey], " "), " ")
-		if len(name) > 0 {
-			if firstName == "" {
-				firstName = name[0]
-			}
+		name := strings.SplitN(strings.Trim(launchData[launchDataFullNameKey], " "), " ", 2)
+		if firstName == "" && len(name) > 0 {
+			firstName = name[0]
+		}
 
-			if lastName == "" {
-				lastName = strings.Join(name[1:], " ")
-			}
+		if lastName == "" && len(name) > 1 {
+			lastName = name[1]
 		}
 	}
 
