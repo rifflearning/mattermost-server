@@ -1250,7 +1250,7 @@
   },
   {
     "id": "api.lti.signup.no_lms_found",
-    "translation": "LTI-12: An LMS was not found for provided Consumer Key."
+    "translation": "LTI-12: An LMS was not found for the provided Consumer Key."
   },
   {
     "id": "web.lti.login.no_lms_found",
