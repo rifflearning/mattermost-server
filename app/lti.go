@@ -158,7 +158,11 @@ func (a *App) addTeamMemberIfRequired(userId string, teamName string) *model.App
 }
 
 func (a *App) syncLTIChannels(channels map[string]string, teamId string) {
+	mlog.Debug("Syncing lti channels")
 	channelNames := make([]string, len(channels), len(channels))
+
+	mlog.Debug(fmt.Sprintf("%v", channelNames))
+
 	i := 0
 	for slug := range channels {
 		channelNames[i] = slug
@@ -166,11 +170,15 @@ func (a *App) syncLTIChannels(channels map[string]string, teamId string) {
 
 	c, err := a.GetChannelsByNames(channelNames, teamId)
 	if err != nil {
+		mlog.Debug("errrrrr")
 		mlog.Error(err.Error())
 		return
 	}
 
 	for _, channel := range c {
+		mlog.Debug(channel.DisplayName)
+		mlog.Debug(channel.Name)
+		mlog.Debug(channels[channel.Name])
 		// update channel if display name has changed
 		if channel.DisplayName != channels[channel.Name] {
 			channel.Name = channels[channel.Name]
