@@ -74,6 +74,11 @@ func (a *App) SyncLTIUser(userId string, lms model.LMS, launchData map[string]st
 	return user, nil
 }
 
+func (a *App) SyncLTIChannels(lms model.LMS, launchData map[string]string) {
+	a.syncLTIChannels(lms.GetPublicChannelsToJoin(launchData), lms.GetTeam(launchData))
+	a.syncLTIChannels(lms.GetPrivateChannelsToJoin(launchData), lms.GetTeam(launchData))
+}
+
 func (a *App) GetUserByLTI(ltiUserID string) (*model.User, *model.AppError) {
 	if result := <-a.Srv.Store.User().GetByLTI(ltiUserID); result.Err != nil {
 		return nil, result.Err
@@ -150,4 +155,28 @@ func (a *App) addTeamMemberIfRequired(userId string, teamName string) *model.App
 	}
 
 	return nil
+}
+
+func (a *App) syncLTIChannels(channels map[string]string, teamId string) {
+	channelNames := make([]string, len(channels), len(channels))
+	i := 0
+	for slug := range channels {
+		channelNames[i] = slug
+	}
+
+	c, err := a.GetChannelsByNames(channelNames, teamId)
+	if err != nil {
+		mlog.Error(err.Error())
+		return
+	}
+
+	for _, channel := range c {
+		// update channel if display name has changed
+		if channel.DisplayName != channels[channel.Name] {
+			channel.Name = channels[channel.Name]
+			if _, err := a.UpdateChannel(channel); err != nil {
+				mlog.Error(err.Error())
+			}
+		}
+	}
 }

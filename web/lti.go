@@ -99,6 +99,7 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 
 	mlog.Debug("Logging in the user")
 	user, err = c.App.SyncLTIUser(user.Id, lms, launchData)
+	c.App.SyncLTIChannels(lms, launchData)
 	if err != nil {
 		c.Err = model.NewAppError("LoginLTIUser", "web.lti.login.sync_user.app_error", nil, "", err.StatusCode)
 		return
