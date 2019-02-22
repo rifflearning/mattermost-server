@@ -178,6 +178,12 @@ func (e *EdxLMS) GetChannel(launchData map[string]string) (string, *AppError) {
 
 	}
 
+	end := CHANNEL_NAME_UI_MAX_LENGTH
+	if len(channelSlug) < end {
+		end = len(channelSlug)
+	}
+
+	channelSlug = channelSlug[0:end]
 	return channelSlug, nil
 }
 

@@ -74,9 +74,17 @@ func (a *App) SyncLTIUser(userId string, lms model.LMS, launchData map[string]st
 	return user, nil
 }
 
-func (a *App) SyncLTIChannels(lms model.LMS, launchData map[string]string) {
-	a.syncLTIChannels(lms.GetPublicChannelsToJoin(launchData), lms.GetTeam(launchData))
-	a.syncLTIChannels(lms.GetPrivateChannelsToJoin(launchData), lms.GetTeam(launchData))
+func (a *App) SyncLTIChannels(lms model.LMS, launchData map[string]string) *model.AppError {
+	teamSlug := lms.GetTeam(launchData)
+	team, err := a.GetTeamByName(teamSlug)
+	if err != nil {
+		return err
+	}
+
+	a.syncLTIChannels(lms.GetPublicChannelsToJoin(launchData), team.Id)
+	a.syncLTIChannels(lms.GetPrivateChannelsToJoin(launchData), team.Id)
+
+	return nil
 }
 
 func (a *App) GetUserByLTI(ltiUserID string) (*model.User, *model.AppError) {
@@ -158,30 +166,23 @@ func (a *App) addTeamMemberIfRequired(userId string, teamName string) *model.App
 }
 
 func (a *App) syncLTIChannels(channels map[string]string, teamId string) {
-	mlog.Debug("Syncing lti channels")
-	channelNames := make([]string, len(channels), len(channels))
+	mlog.Debug("Syncing LTI channels")
+	channelNames := []string{}
 
-	mlog.Debug(fmt.Sprintf("%v", channelNames))
-
-	i := 0
 	for slug := range channels {
-		channelNames[i] = slug
+		channelNames = append(channelNames, slug)
 	}
 
 	c, err := a.GetChannelsByNames(channelNames, teamId)
 	if err != nil {
-		mlog.Debug("errrrrr")
 		mlog.Error(err.Error())
 		return
 	}
 
 	for _, channel := range c {
-		mlog.Debug(channel.DisplayName)
-		mlog.Debug(channel.Name)
-		mlog.Debug(channels[channel.Name])
 		// update channel if display name has changed
 		if channel.DisplayName != channels[channel.Name] {
-			channel.Name = channels[channel.Name]
+			channel.DisplayName = channels[channel.Name]
 			if _, err := a.UpdateChannel(channel); err != nil {
 				mlog.Error(err.Error())
 			}
