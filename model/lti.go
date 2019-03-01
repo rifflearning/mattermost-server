@@ -5,6 +5,7 @@ package model
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/mattermost/mattermost-server/mlog"
@@ -93,4 +94,15 @@ func transformLTIUsername(ltiUsername string) string {
 	}
 
 	return mattermostUsername
+}
+
+func GetLMSChannelSlug(personalChannelName, channelId string) string {
+	channelSlug := fmt.Sprintf("%s-%s", personalChannelName, channelId)
+	end := CHANNEL_NAME_UI_MAX_LENGTH
+	if len(channelSlug) < end {
+		end = len(channelSlug)
+	}
+
+	channelSlug = channelSlug[0:end]
+	return channelSlug
 }
