@@ -98,11 +98,14 @@ func transformLTIUsername(ltiUsername string) string {
 
 func GetLMSChannelSlug(personalChannelName, channelId string) string {
 	channelSlug := fmt.Sprintf("%s-%s", personalChannelName, channelId)
+	return truncateLMSChannelSlug(channelSlug)
+}
+
+func truncateLMSChannelSlug(channelSlug string) string {
 	end := CHANNEL_NAME_UI_MAX_LENGTH
 	if len(channelSlug) < end {
 		end = len(channelSlug)
 	}
 
-	channelSlug = channelSlug[0:end]
-	return channelSlug
+	return channelSlug[0:end]
 }
