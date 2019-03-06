@@ -68,7 +68,7 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		setUserNameCookie(c, w, user.FirstName + " " + user.LastName)
+		setUserNameCookie(c, w, user.FirstName+" "+user.LastName)
 
 		mlog.Debug("Redirecting to login page")
 		http.Redirect(w, r, c.GetSiteURLHeader()+"/signup_lti", http.StatusFound)
@@ -129,7 +129,7 @@ func GetRedirectUrl(lms model.LMS, launchData map[string]string, siteURL string)
 	teamSlug := lms.GetTeam(launchData)
 	channelSlug, err := lms.GetChannel(launchData)
 	if err != nil {
-		mlog.Error("Error occurred searching for channel to redirect to. Continuing to Mattermost homepage. Error: " +err.Error())
+		mlog.Error("Error occurred searching for channel to redirect to. Continuing to Mattermost homepage. Error: " + err.Error())
 	}
 
 	if channelSlug == "" {
@@ -197,12 +197,12 @@ func setUserNameCookie(c *Context, w http.ResponseWriter, name string) {
 	expiresAt := time.Unix(model.GetMillis()/1000+int64(maxAge), 0)
 
 	cookie := &http.Cookie{
-		Name: model.LTI_NAME_COOKIE,
-		Value: base64.StdEncoding.EncodeToString([]byte(name)),
-		Path: "/",
-		MaxAge: maxAge,
-		Expires: expiresAt,
-		Domain: c.App.GetCookieDomain(),
+		Name:     model.LTI_NAME_COOKIE,
+		Value:    base64.StdEncoding.EncodeToString([]byte(name)),
+		Path:     "/",
+		MaxAge:   maxAge,
+		Expires:  expiresAt,
+		Domain:   c.App.GetCookieDomain(),
 		HttpOnly: false,
 	}
 
