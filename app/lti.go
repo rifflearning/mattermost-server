@@ -123,7 +123,7 @@ func (a *App) createChannelsIfRequired(teamId string, channels map[string]string
 
 			channel, err = a.CreateChannel(channel, false)
 			if err != nil {
-				mlog.Error("Failed to create channel for LMS onboarding: " + err.Error())
+				mlog.Error("Failed to create channel for LMS onboarding: "+err.Error(), mlog.Any("Channel", channel))
 				continue
 			}
 		}

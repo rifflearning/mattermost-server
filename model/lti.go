@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/mattermost/mattermost-server/mlog"
 )
@@ -97,8 +98,12 @@ func transformLTIUsername(ltiUsername string) string {
 }
 
 func GetLMSChannelSlug(personalChannelName, channelId string) string {
-	channelSlug := fmt.Sprintf("%s-%s", personalChannelName, channelId)
-	return truncateLMSChannelSlug(channelSlug)
+	channelSlugRaw := fmt.Sprintf("%s-%s", personalChannelName, channelId)
+	// This trim is a patch because creating the channel fails if the slug ends w/ a '-'
+	// What we should do is remove all non alphanumeric characters from the channelId and lowercase it
+	// and then concatenate and truncate.
+	channelSlug := strings.Trim(truncateLMSChannelSlug(channelSlugRaw), "-")
+	return channelSlug
 }
 
 func truncateLMSChannelSlug(channelSlug string) string {
