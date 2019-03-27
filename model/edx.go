@@ -4,7 +4,6 @@
 package model
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 )
@@ -139,14 +138,7 @@ func (e *EdxLMS) GetPrivateChannelsToJoin(launchData map[string]string) map[stri
 
 	for personalChannelName, channelConfig := range e.PersonalChannels.ChannelList {
 		channelDisplayName := launchData[channelConfig.NameProperty]
-		channelSlug := fmt.Sprintf("%s-%s", personalChannelName, launchData[channelConfig.IdProperty])
-
-		end := CHANNEL_NAME_UI_MAX_LENGTH
-		if len(channelSlug) < end {
-			end = len(channelSlug)
-		}
-
-		channelSlug = channelSlug[0:end]
+		channelSlug := GetLMSChannelSlug(personalChannelName, launchData[channelConfig.IdProperty])
 
 		if channelDisplayName != "" && channelSlug != "" {
 			channels[channelSlug] = channelDisplayName
@@ -173,18 +165,10 @@ func (e *EdxLMS) GetChannel(launchData map[string]string) (string, *AppError) {
 			return "", NewAppError("GetChannel", "get_channel.redirect_lookup_channel.not_found", nil, "", http.StatusBadRequest)
 		}
 
-		channelSlug = fmt.Sprintf("%s-%s", components[1], launchData[edxChannel.IdProperty])
-	} else {
-
+		channelSlug = GetLMSChannelSlug(components[1], launchData[edxChannel.IdProperty])
 	}
 
-	end := CHANNEL_NAME_UI_MAX_LENGTH
-	if len(channelSlug) < end {
-		end = len(channelSlug)
-	}
-
-	channelSlug = channelSlug[0:end]
-	return channelSlug, nil
+	return truncateLMSChannelSlug(channelSlug), nil
 }
 
 func (e *EdxLMS) SyncUser(user *User, launchData map[string]string) *User {
