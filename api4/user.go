@@ -53,6 +53,7 @@ func (api *API) InitUser() {
 
 	api.BaseRoutes.UserByUsername.Handle("", api.ApiSessionRequired(getUserByUsername)).Methods("GET")
 	api.BaseRoutes.UserByEmail.Handle("", api.ApiSessionRequired(getUserByEmail)).Methods("GET")
+	api.BaseRoutes.UserAnalytics.Handle("", api.ApiSessionRequired(getUserAnalytics)).Methods("GET")
 
 	api.BaseRoutes.User.Handle("/sessions", api.ApiSessionRequired(getSessions)).Methods("GET")
 	api.BaseRoutes.User.Handle("/sessions/revoke", api.ApiSessionRequired(revokeSession)).Methods("POST")
@@ -1567,4 +1568,39 @@ func registerTermsOfServiceAction(c *Context, w http.ResponseWriter, r *http.Req
 
 	c.LogAudit("TermsOfServiceId=" + termsOfServiceId + ", accepted=" + strconv.FormatBool(accepted))
 	ReturnStatusOK(w)
+}
+
+// This function handles a GET request to the users/{userId}/teams/{teamId}/useranalytics route
+// It accepts 3 parameters:
+//     1. c: A pointer to a Context, which is the request's context
+//     2. w: A http.ResponseWriter, which allows you to send a response to the sender of the request
+//     3. r: A pointer to a http.Request, which contains data that came in the api request
+// The api request must contain a name as a query parameter - the data set to return
+// The names of data sets are defined as Datasets in mattermost-redux/src/constants/user_analytics
+// The datasets TargetUser, LearningGroups, and LearningGroupTypes are always returned
+// This function will return a UserAnalytics struct converted to JSON
+// The UserAnalytics struct is defined in model/user.go
+// All possible datasets are defined as properties of the UserAnalytics struct
+func getUserAnalytics(c *Context, w http.ResponseWriter, r *http.Request) {
+	name := r.URL.Query().Get("name")
+
+	// Verify that userId in the context is a valid user id
+	var err *model.AppError
+	if _, err = c.App.GetUser(c.Params.UserId); err != nil {
+		c.Err = err
+		return
+	}
+
+	// Call to service layer (/app/user.go)
+	rows, err := c.App.GetUserAnalytics(c.Params.UserId, c.Params.TeamId, name)
+
+	// If service or data layer errored, return
+	// Error will get logged in function that errored
+	if err != nil {
+		c.Err = err
+		return
+	}
+
+	// Return user analytics data to mattermost-redux as json
+	w.Write([]byte(rows.ToJson()))
 }
