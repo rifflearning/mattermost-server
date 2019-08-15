@@ -67,6 +67,27 @@ func (e *EdxLMS) GetOAuthConsumerSecret() string {
 	return e.OAuthConsumerSecret
 }
 
+// If this LMS has an LTI contextId (course ID) associated with the given team return true
+func (e *EdxLMS) IsLMSForTeam(teamSlug string) bool {
+	for _, lmsTeamSlug := range e.Teams {
+		if lmsTeamSlug == teamSlug {
+			return true
+		}
+	}
+	return false
+}
+
+// Get the names of the personal channels (order of the names will be random)
+func (e *EdxLMS) GetPersonalChannelNames() []string {
+	// At the current time there are only 2 personal channels, so we might as well set the
+	// capacity to that.
+	channelNames := make([]string, 0, 2)
+	for personalChannelName := range e.PersonalChannels.ChannelList {
+		channelNames = append(channelNames, personalChannelName)
+	}
+	return channelNames
+}
+
 func (e *EdxLMS) GetUserId(launchData map[string]string) string {
 	return launchData[launchDataLTIUserIdKey]
 }

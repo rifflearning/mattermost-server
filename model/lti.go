@@ -35,6 +35,8 @@ type LMS interface {
 	GetType() string
 	GetOAuthConsumerKey() string
 	GetOAuthConsumerSecret() string
+	GetPersonalChannelNames() []string
+	IsLMSForTeam(teamSlug string) bool
 	GetUserId(launchData map[string]string) string
 	ValidateLTIRequest(url string, request *http.Request) bool
 	BuildUser(launchData map[string]string, password string) (*User, *AppError)
