@@ -1811,8 +1811,11 @@ func (us *SqlUserStore) GetUserLearningGroups(userId string, teamId string, lear
 					LIMIT 1
 				) AS 'HasLeftGroup'
 
-
 				    FROM Channels
+
+						JOIN ChannelMemberHistory
+						ON ChannelMemberHistory.UserID = :userId
+						AND ChannelMemberHistory.ChannelID = Channels.Id
 
 				WHERE Channels.TeamID = :teamId
 				AND Channels.Type = 'P'
