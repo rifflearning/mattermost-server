@@ -74,7 +74,7 @@ type UserInteraction struct {
 	ChannelType string `json:"channel_type"`
 
 	// The slug name of the channel that this interaction took place in (Channels.Name)
-	ChannelName string `json:"channel_name"`
+	ChannelSlugName string `json:"channel_slug_name"`
 }
 
 // This is a struct for a learning group type
@@ -110,7 +110,10 @@ type LearningGroup struct {
 	ChannelId string `json:"channel_id"`
 
 	// The slug name of the private channel for this learning group (Channels.Name)
-	ChannelName string `json:"channel_name"`
+	ChannelSlugName string `json:"channel_slug_name"`
+
+	// The display name of the private channel for this learning group (Channels.DisplayName)
+	ChannelDisplayName string `json:"channel_display_name"`
 
 	// A comma delimited list of the usernames of the members of this learning group (channel)
 	Members *string `json:"members"`
