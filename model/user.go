@@ -56,7 +56,8 @@ type UserInteraction struct {
 	InteractionType string `json:"interaction_type"`
 
 	// The username of the user that this interaction took place with
-	Username string `json:"username"`
+	// Use pointer because interactions of type 'Post' will not have a corresponding username
+	Username *string `json:"username"`
 
 	// Denotes whether or not the current user was the recipient of this interaction
 	IsRecipient bool `json:"is_recipient"`
