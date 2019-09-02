@@ -1400,7 +1400,8 @@ func (us *SqlUserStore) GetUserInteractions(userId string, teamId string, learni
 
 				END AS 'Context',
 				Channels.Type AS 'ChannelType',
-				Channels.Name AS 'ChannelName'
+				Channels.Name AS 'ChannelSlugName',
+				Channels.DisplayName AS 'ChannelDisplayName'
 
 				    FROM Reactions
 
@@ -1430,7 +1431,8 @@ func (us *SqlUserStore) GetUserInteractions(userId string, teamId string, learni
 
 				END AS 'Context',
 				Channels.Type AS 'ChannelType',
-				Channels.Name AS 'ChannelName'
+				Channels.Name AS 'ChannelSlugName',
+				Channels.DisplayName AS 'ChannelDisplayName'
 
 				    FROM Reactions
 
@@ -1474,7 +1476,8 @@ func (us *SqlUserStore) GetUserInteractions(userId string, teamId string, learni
 
 				END AS 'Context',
 				Channels.Type AS 'ChannelType',
-				Channels.Name AS 'ChannelName'
+				Channels.Name AS 'ChannelSlugName',
+				Channels.DisplayName AS 'ChannelDisplayName'
 
 				    FROM Users Mentionee
 
@@ -1518,7 +1521,8 @@ func (us *SqlUserStore) GetUserInteractions(userId string, teamId string, learni
 
 				END AS 'Context',
 				Channels.Type AS 'ChannelType',
-				Channels.Name AS 'ChannelName'
+				Channels.Name AS 'ChannelSlugName',
+				Channels.DisplayName AS 'ChannelDisplayName'
 
 				  FROM Posts Reply
 
@@ -1561,7 +1565,8 @@ func (us *SqlUserStore) GetUserInteractions(userId string, teamId string, learni
 				END AS 'IsRecipient',
 				'course' AS 'Context',
 				Channels.Type AS 'ChannelType',
-				Channels.Name AS 'ChannelName'
+				Channels.Name AS 'ChannelSlugName',
+				Channels.DisplayName AS 'ChannelDisplayName'
 
 				    FROM Posts
 
@@ -1625,7 +1630,8 @@ func (us *SqlUserStore) GetUserInteractions(userId string, teamId string, learni
 				END AS 'IsRecipient',
 				'course' AS 'Context',
 				ChannelType,
-				ChannelName
+				ChannelSlugName,
+				ChannelDisplayName
 
 				    FROM ChannelMembers
 
@@ -1646,7 +1652,9 @@ func (us *SqlUserStore) GetUserInteractions(userId string, teamId string, learni
 					        ParentPostAuthor.Id AS 'Parent_Post_Author_Id',
 					        Posts.Id AS 'PostId',
 					        Channels.Type AS 'ChannelType',
-					        Channels.Name AS 'ChannelName'
+					        Channels.Name AS 'ChannelSlugName',
+									Channels.DisplayName AS 'ChannelDisplayName'
+
 
 					            FROM Posts
 
@@ -1709,7 +1717,8 @@ func (us *SqlUserStore) GetUserInteractions(userId string, teamId string, learni
 
 				END AS 'Context',
 				Channels.Type AS 'ChannelType',
-				Channels.Name AS 'ChannelName'
+				Channels.Name AS 'ChannelSlugName',
+				Channels.DisplayName AS 'ChannelDisplayName'
 
 				    FROM Posts
 
@@ -1811,7 +1820,8 @@ func (us *SqlUserStore) GetUserLearningGroups(userId string, teamId string, lear
 				` + prefixQuery + `
 				END AS 'LearningGroupPrefix',
 				Channels.Id AS 'ChannelId',
-				Channels.Name AS 'ChannelName',
+				Channels.Name AS 'ChannelSlugName',
+				Channels.DisplayName AS 'ChannelDisplayName',
 				(
 				SELECT GROUP_CONCAT(Users.Username)
 				    FROM Users
