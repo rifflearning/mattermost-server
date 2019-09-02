@@ -1696,15 +1696,42 @@ func (us *SqlUserStore) GetUserInteractions(userId string, teamId string, learni
 				        AND Parent_Post_Author_Id = :userId
 				        AND ChannelMembersUsers.Id != :userId)
 				)
+
+				UNION ALL
+
+				(-- Posts by current user in Public and Private channels
+				SELECT 'Post' AS 'InteractionType',
+				NULL AS 'Username',
+				0 AS 'IsRecipient',
+				CASE
+						` + prefixQuery + `
+						ELSE 'course'
+
+				END AS 'Context',
+				Channels.Type AS 'ChannelType',
+				Channels.Name AS 'ChannelName'
+
+				    FROM Posts
+
+				    JOIN Channels
+				    ON Channels.Id = Posts.ChannelId
+						AND Channels.Type IN ('O', 'P')
+						AND Channels.TeamId = :teamId
+
+				WHERE Posts.OriginalId = ''
+				AND Posts.ParentId = '' -- dont count replies here
+				AND Posts.UserId = :userId
+				AND Posts.Type = '' -- System posts (ex. John joined the channel), are technically posted by the user's Id
+				)
 			) AS UserInteractions
 
-			WHERE Username IN (SELECT Username -- all interactions must take place with users on your team
+			WHERE (Username IN (SELECT Username -- all interactions must take place with users on your team (unless type is 'Post')
 			                          FROM Users
 
 			                            JOIN TeamMembers
 			                            ON TeamMembers.TeamID = :teamId
 			                            AND TeamMembers.UserId = Users.Id
-			                        )
+			                        ) OR InteractionType = 'Post')
 			`
 		var userInteractions []*model.UserInteraction
 
