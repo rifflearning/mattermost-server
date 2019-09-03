@@ -56,7 +56,8 @@ type UserInteraction struct {
 	InteractionType string `json:"interaction_type"`
 
 	// The username of the user that this interaction took place with
-	Username string `json:"username"`
+	// Use pointer because interactions of type 'Post' will not have a corresponding username
+	Username *string `json:"username"`
 
 	// Denotes whether or not the current user was the recipient of this interaction
 	IsRecipient bool `json:"is_recipient"`
@@ -73,7 +74,7 @@ type UserInteraction struct {
 	ChannelType string `json:"channel_type"`
 
 	// The slug name of the channel that this interaction took place in (Channels.Name)
-	ChannelName string `json:"channel_name"`
+	ChannelSlugName string `json:"channel_slug_name"`
 }
 
 // This is a struct for a learning group type
@@ -109,7 +110,10 @@ type LearningGroup struct {
 	ChannelId string `json:"channel_id"`
 
 	// The slug name of the private channel for this learning group (Channels.Name)
-	ChannelName string `json:"channel_name"`
+	ChannelSlugName string `json:"channel_slug_name"`
+
+	// The display name of the private channel for this learning group (Channels.DisplayName)
+	ChannelDisplayName string `json:"channel_display_name"`
 
 	// A comma delimited list of the usernames of the members of this learning group (channel)
 	Members *string `json:"members"`
