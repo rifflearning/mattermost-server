@@ -19,6 +19,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -1687,13 +1688,51 @@ func (a *App) GetUserAnalytics(userId string, teamId string, name string) (*mode
 	}
 
 	// Always return the user's learning groups
-	if userLearningGroups := <-a.Srv.Store.User().GetUserLearningGroups(userId, teamId, learningGroupTypes); userLearningGroups.Err != nil {
+	userLearningGroupsQueryResult := <-a.Srv.Store.User().GetUserLearningGroups(userId, teamId, learningGroupTypes)
+	if userLearningGroupsQueryResult.Err != nil {
 		// Return and exit from GetUserAnalytics with error
-		return nil, userLearningGroups.Err
+		return nil, userLearningGroupsQueryResult.Err
 	} else {
+
+		userLearningGroupsQueryRows := userLearningGroupsQueryResult.Data.([]*model.LearningGroupQueryRow)
+		var userLearningGroups []*model.LearningGroup = make([]*model.LearningGroup, len(userLearningGroupsQueryRows))
+
+		//mlog.Debug("GetUserAnalytics: user learning groups", mlog.Any("userLearningGroupsQueryRows", userLearningGroupsQueryRows))
+
+		// Loop over learning group query rows and create a learning group for each
+		// Also, for each learning group, if it has members, create LearningGroupMember structs for each member
+		// Note: in a learning group query row, members is a double delimited string of users (; delimited) and
+		// each user's id and username (, delimited)
+
+		for i, userLearningGroupQueryRow := range userLearningGroupsQueryRows {
+			userLearningGroup := model.LearningGroup{
+				LearningGroupName:   userLearningGroupQueryRow.LearningGroupName,
+				LearningGroupPrefix: userLearningGroupQueryRow.LearningGroupPrefix,
+				ChannelId:           userLearningGroupQueryRow.ChannelId,
+				ChannelSlugName:     userLearningGroupQueryRow.ChannelSlugName,
+				ChannelDisplayName:  userLearningGroupQueryRow.ChannelDisplayName,
+				HasLeftGroup:        userLearningGroupQueryRow.HasLeftGroup,
+			}
+			userLearningGroups[i] = &userLearningGroup
+
+			if userLearningGroupQueryRow.Members == nil {
+				continue
+			}
+
+			usersInLearningGroup := strings.Split(*userLearningGroupQueryRow.Members, ";")
+			membersArray := make([]model.LearningGroupMember, len(usersInLearningGroup))
+
+			for j, user := range usersInLearningGroup {
+				userData := strings.Split(user, ",")
+				membersArray[j] = model.LearningGroupMember{Id: userData[0], Username: userData[1]}
+			}
+
+			userLearningGroups[i].Members = membersArray
+		}
+
 		// Add LearningGroups data to the returnData object
 		// Assert as type 'array of pointers to LearningGroup structs'
-		if returnData.UserLearningGroups, assertionSuccess = userLearningGroups.Data.([]*model.LearningGroup); !assertionSuccess {
+		if returnData.UserLearningGroups, assertionSuccess = interface{}(userLearningGroups).([]*model.LearningGroup); !assertionSuccess {
 			// Return and exit from GetUserAnalytics with error
 			return nil, model.NewAppError("GetUserAnalytics", "api.user.get_user_analytics.learning_group_assertion_error", nil, "", http.StatusBadRequest)
 		}
@@ -1748,6 +1787,11 @@ func (a *App) GetLearningGroupTypes(teamId string) ([]*model.LearningGroupType, 
 			}
 		}
 	}
+
+	// Sort the learning group types by prefix so the same set of types is always returned in the same order
+	sort.Slice(learningGroupTypes[:], func(i, j int) bool {
+		return learningGroupTypes[i].Prefix < learningGroupTypes[j].Prefix
+	})
 
 	return learningGroupTypes, nil
 }
