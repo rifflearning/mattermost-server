@@ -19,6 +19,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -1748,6 +1749,11 @@ func (a *App) GetLearningGroupTypes(teamId string) ([]*model.LearningGroupType, 
 			}
 		}
 	}
+
+	// Sort the learning group types by prefix so the same set of types is always returned in the same order
+	sort.Slice(learningGroupTypes[:], func(i, j int) bool {
+		return learningGroupTypes[i].Prefix < learningGroupTypes[j].Prefix
+	})
 
 	return learningGroupTypes, nil
 }
