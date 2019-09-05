@@ -1823,7 +1823,11 @@ func (us *SqlUserStore) GetUserLearningGroups(userId string, teamId string, lear
 				Channels.Name AS 'ChannelSlugName',
 				Channels.DisplayName AS 'ChannelDisplayName',
 				(
-				SELECT GROUP_CONCAT(Users.Username)
+				SELECT GROUP_CONCAT(
+									CONCAT(Users.id,',',Users.Username)
+									SEPARATOR ';'
+								)
+
 				    FROM Users
 				WHERE Users.Id IN (SELECT UserId
                                FROM ChannelMembers CM
@@ -1859,7 +1863,7 @@ func (us *SqlUserStore) GetUserLearningGroups(userId string, teamId string, lear
 				AND
 				(` + prefixFilterQuery + `)
 			`
-		var userTeams []*model.LearningGroup
+		var userTeams []*model.LearningGroupQueryRow
 
 		if _, err := us.GetReplica().Select(&userTeams, query, map[string]interface{}{"userId": userId, "teamId": teamId}); err != nil {
 			result.Err = model.NewAppError("SqlUserStore.GetLearningGroups", "store.sql_post.get_user_teams.app_error", nil, err.Error(), http.StatusInternalServerError)

@@ -96,7 +96,6 @@ type UserAnalytics struct {
 }
 
 // This is a struct for a learning group (ex. capstone)
-// **Note: Using pointers as property types allows for null values
 type LearningGroup struct {
 	// The name of the learning group (the channel name minus the learning group type's prefix)
 	//     ex. plg-30 => 30
@@ -115,11 +114,48 @@ type LearningGroup struct {
 	// The display name of the private channel for this learning group (Channels.DisplayName)
 	ChannelDisplayName string `json:"channel_display_name"`
 
-	// A comma delimited list of the usernames of the members of this learning group (channel)
+	// An array of LearningGroupMember structs for every member of this learning group (channel)
+	Members []LearningGroupMember `json:"members"`
+
+	// Denotes whether or not the current user has left this learning group
+	HasLeftGroup bool `json:"has_left_group"`
+}
+
+// This is a struct for a learning group query row (ex. capstone)
+// **Note: Using pointers as property types allows for null values
+type LearningGroupQueryRow struct {
+	// The name of the learning group (the channel name minus the learning group type's prefix)
+	//     ex. plg-30 => 30
+	LearningGroupName string `json:"learning_group_name"`
+
+	// The prefix for this learning group type (personal channel name from the config)
+	//     ex. plg
+	LearningGroupPrefix string `json:"learning_group_prefix"`
+
+	// The id of the private channel for this learning group
+	ChannelId string `json:"channel_id"`
+
+	// The slug name of the private channel for this learning group (Channels.Name)
+	ChannelSlugName string `json:"channel_slug_name"`
+
+	// The display name of the private channel for this learning group (Channels.DisplayName)
+	ChannelDisplayName string `json:"channel_display_name"`
+
+	// A semicolor (;) delimited string of members of this learning group channel where each
+	// member string consists of the member's id and username separated by a comma (,).
 	Members *string `json:"members"`
 
 	// Denotes whether or not the current user has left this learning group
 	HasLeftGroup bool `json:"has_left_group"`
+}
+
+// A struct for a member of a learning group
+type LearningGroupMember struct {
+	// The id of this member (user)
+	Id string `json:"id"`
+
+	// The username of this member (user)
+	Username string `json:"username"`
 }
 
 type User struct {
