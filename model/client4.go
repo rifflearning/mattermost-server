@@ -502,6 +502,10 @@ func (c *Client4) GetServerBusyRoute() string {
 	return "/server_busy"
 }
 
+func (c *Client4) GetSignupWithLTIRoute() string {
+	return "/lti/signup"
+}
+
 func (c *Client4) GetUserTermsOfServiceRoute(userId string) string {
 	return c.GetUserRoute(userId) + "/terms_of_service"
 }
@@ -5209,6 +5213,20 @@ func (c *Client4) GetServerBusyExpires() (*time.Time, *Response) {
 	sbs := ServerBusyStateFromJson(r.Body)
 	expires := time.Unix(sbs.Expires, 0)
 	return &expires, BuildResponse(r)
+}
+
+// SignupLTIUser signs up the LTI user in the post data using the given password for
+// email logins by that LTI user.
+func (c *Client4) SignupLTIUser(password string) *Response {
+	url := c.GetSignupWithLTIRoute()
+
+	data := map[string]string{"password": password}
+
+	if r, err := c.DoApiPost(url, MapToJson(data)); err != nil {
+		return BuildErrorResponse(r, err)
+	} else {
+		return BuildResponse(r)
+	}
 }
 
 // RegisterTermsOfServiceAction saves action performed by a user against a specific terms of service.

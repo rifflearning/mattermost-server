@@ -58,6 +58,7 @@ func TestUserStore(t *testing.T, ss store.Store, s SqlSupplier) {
 	t.Run("GetProfilesByUsernames", func(t *testing.T) { testUserStoreGetProfilesByUsernames(t, ss) })
 	t.Run("GetSystemAdminProfiles", func(t *testing.T) { testUserStoreGetSystemAdminProfiles(t, ss) })
 	t.Run("GetByEmail", func(t *testing.T) { testUserStoreGetByEmail(t, ss) })
+	t.Run("GetByLTI", func(t *testing.T) { testUserStoreGetByLTI(t, ss) })
 	t.Run("GetByAuthData", func(t *testing.T) { testUserStoreGetByAuthData(t, ss) })
 	t.Run("GetByUsername", func(t *testing.T) { testUserStoreGetByUsername(t, ss) })
 	t.Run("GetForLogin", func(t *testing.T) { testUserStoreGetForLogin(t, ss) })
@@ -1794,6 +1795,33 @@ func testUserStoreGetByEmail(t *testing.T, ss store.Store) {
 		_, err := ss.User().GetByEmail("unknown")
 		require.NotNil(t, err)
 		require.Equal(t, err.Id, store.MISSING_ACCOUNT_ERROR)
+	})
+}
+
+func testUserStoreGetByLTI(t *testing.T, ss store.Store) {
+	teamId := model.NewId()
+
+	u1, err := ss.User().Save(&model.User{
+		Email: MakeEmail(),
+		Props: model.StringMap{
+			model.LTI_USER_ID_PROP_KEY: model.NewId(),
+		},
+	})
+	require.Nil(t, err)
+	defer func() { require.Nil(t, ss.User().PermanentDelete(u1.Id)) }()
+	_, err = ss.Team().SaveMember(&model.TeamMember{TeamId: teamId, UserId: u1.Id}, -1)
+	require.Nil(t, err)
+
+	t.Run("get u1 by lti id", func(t *testing.T) {
+		u, err := ss.User().GetByLTI(u1.Props[model.LTI_USER_ID_PROP_KEY])
+		require.Nil(t, err)
+		assert.Equal(t, u1, u)
+	})
+
+	t.Run("get by empty lti id", func(t *testing.T) {
+		_, err := ss.User().GetByLTI("")
+		require.NotNil(t, err)
+		require.Equal(t, err.Id, store.MISSING_LTI_ACCOUNT_ERROR)
 	})
 }
 
