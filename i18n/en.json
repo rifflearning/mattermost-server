@@ -1573,6 +1573,94 @@
     "translation": "Unable to request a trial license. Please configure a Site URL in the web server section of the Mattermost System Console."
   },
   {
+    "id": "web.lti.login.disabled.app_error",
+    "translation": "LTI-01: LTI authentication is disabled."
+  },
+  {
+    "id": "web.lti.login.parse.app_error",
+    "translation": "LTI-02: LTI Launch Data was malformed."
+  },
+  {
+    "id": "web.lti.login.validation.app_error",
+    "translation": "LTI-03: LTI Launch Data failed OAuth signature validation."
+  },
+  {
+    "id": "web.lti.login.cross_linked_users.app_error",
+    "translation": "LTI-04: An account was found for the email provided but it is associated with another user ID."
+  },
+  {
+    "id": "web.lti.login.marshalling.app_error",
+    "translation": "LTI-05: LTI Launch Data was could not be processed."
+  },
+  {
+    "id": "api.lti.signup.disabled.app_error",
+    "translation": "LTI-06: LTI authentication is disabled."
+  },
+  {
+    "id": "api.lti.signup.cookie_missing.app_error",
+    "translation": "LTI-07: LTI signup cookie was not found."
+  },
+  {
+    "id": "api.lti.signup.decoding.app_error",
+    "translation": "LTI-08: LTI signup cookie could not be decoded."
+  },
+  {
+    "id": "api.lti.signup.unmarshaling.app_error",
+    "translation": "LTI-09: LTI signup cookie data was malformed."
+  },
+  {
+    "id": "api.lti.signup.validation.app_error",
+    "translation": "LTI-10: LTI signup cookie failed signature validation."
+  },
+  {
+    "id": "api.lti.signup.create_user.app_error",
+    "translation": "LTI-11: Unable to create a new user account. {{.UserError}}"
+  },
+  {
+    "id": "api.lti.signup.no_lms_found",
+    "translation": "LTI-12: An LMS was not found for the provided Consumer Key."
+  },
+  {
+    "id": "web.lti.login.no_lms_found",
+    "translation": "LTI-13: An LMS was not found for the provided Consumer Key."
+  },
+  {
+    "id": "app.onboard_lms_user.team_not_found.app_error",
+    "translation": "LTI-14: The requested Team was not found."
+  },
+  {
+    "id": "get_channel.redirect_lookup_channel.not_found",
+    "translation": "LTI-15: The requested Channel was not found during lookup."
+  },
+  {
+    "id": "web.lti.login.patch_user.app_error",
+    "translation": "LTI-16: Failed to associate an existing user account with an LTI user ID."
+  },
+  {
+    "id": "web.lti.login.onboard_user.app_error",
+    "translation": "LTI-17: Failed to onboard the user to the specified team and/or channels."
+  },
+  {
+    "id": "web.lti.login.sync_user.app_error",
+    "translation": "LTI-18: Failed to sync user account data."
+  },
+  {
+    "id": "web.lti.login.login_user.app_error",
+    "translation": "LTI-19: Failed to login user."
+  },
+  {
+    "id": "edx.build_user.email_missing",
+    "translation": "LTI-23: LTI Launch Data is missing Email."
+  },
+  {
+    "id": "edx.build_user.username_missing",
+    "translation": "LTI-24: LTI Launch Data is missing Username."
+  },
+  {
+    "id": "edx.build_user.lti_user_id_missing",
+    "translation": "LTI-25: LTI Launch Data is missing UserID."
+  },
+  {
     "id": "api.marshal_error",
     "translation": "marshal error"
   },
