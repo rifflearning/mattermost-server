@@ -403,6 +403,14 @@ run-server: start-docker ## Starts the server.
 	mkdir -p $(BUILD_WEBAPP_DIR)/dist/files
 	$(GO) run $(GOFLAGS) $(GO_LINKER_FLAGS) $(PLATFORM_FILES) --disableconfigwatch &
 
+# mjl-change
+#  run-server w/o start-docker
+run-server-in-container: ## Runs the server in a container (doesn't exit until killed)
+	@echo Running mattermost in a container for development
+	mkdir -p $(BUILD_WEBAPP_DIR)/dist/files
+	$(GO) run $(GOFLAGS) $(GO_LINKER_FLAGS) $(PLATFORM_FILES) --disableconfigwatch &
+
+
 debug-server: start-docker
 	mkdir -p $(BUILD_WEBAPP_DIR)/dist/files
 	$(DELVE) debug $(PLATFORM_FILES) --build-flags="-ldflags '\
@@ -430,6 +438,11 @@ run-client-fullmap: ## Runs the webapp with source code mapping (slower; better 
 	cd $(BUILD_WEBAPP_DIR) && $(MAKE) run-fullmap
 
 run: check-prereqs run-server run-client ## Runs the server and webapp.
+
+# mjl-change
+#  run w/o check-prereqs or start-docker
+# don't check-prereqs because we don't need docker AND don't start-docker because we are IN a container
+run-in-container: run-server-in-container run-client ## Runs the server and webapp.
 
 run-fullmap: run-server run-client-fullmap ## Same as run but with a full sourcemap for client.
 
