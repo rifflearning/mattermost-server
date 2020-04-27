@@ -1048,6 +1048,24 @@ func (us SqlUserStore) GetByEmail(email string) (*model.User, error) {
 	return &user, nil
 }
 
+func (us SqlUserStore) GetByLTI(ltiUserID string) (*model.User, *model.AppError) {
+	ltiProp := fmt.Sprintf("%%\"%s\":\"%s\"%%", model.LTI_USER_ID_PROP_KEY, ltiUserID)
+
+	query := us.usersQuery.Where("Props LIKE ?", ltiProp)
+
+	queryString, args, err := query.ToSql()
+	if err != nil {
+		return nil, model.NewAppError("SqlUserStore.GetByLTI", "store.sql_user.app_error", nil, err.Error(), http.StatusInternalServerError)
+	}
+
+	user := model.User{}
+	if err := us.GetReplica().SelectOne(&user, queryString, args...); err != nil {
+		return nil, model.NewAppError("SqlUserStore.GetByLTI", store.MISSING_LTI_ACCOUNT_ERROR, nil, "ltiUserID="+ltiUserID+", "+err.Error(), http.StatusBadRequest)
+	}
+
+	return &user, nil
+}
+
 func (us SqlUserStore) GetByAuth(authData *string, authService string) (*model.User, error) {
 	if authData == nil || *authData == "" {
 		return nil, store.NewErrInvalidInput("User", "<authData>", "empty or nil")

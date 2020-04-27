@@ -1852,19 +1852,10 @@ func logout(c *Context, w http.ResponseWriter, r *http.Request) {
 }
 
 func Logout(c *Context, w http.ResponseWriter, r *http.Request) {
-	auditRec := c.MakeAuditRecord("Logout", audit.Fail)
-	defer c.LogAuditRec(auditRec)
-	c.LogAudit("")
+	// Note: Implementation moved to c.Logout() to use in web package
+	// If the implementation here changes, keep the other one in sync
+	c.Logout(w, r)
 
-	c.RemoveSessionCookie(w, r)
-	if c.App.Session().Id != "" {
-		if err := c.App.RevokeSessionById(c.App.Session().Id); err != nil {
-			c.Err = err
-			return
-		}
-	}
-
-	auditRec.Success()
 	ReturnStatusOK(w)
 }
 

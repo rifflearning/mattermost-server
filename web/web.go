@@ -33,9 +33,11 @@ func New(config configservice.ConfigService, globalOptions app.AppOptionCreator,
 		MainRouter:          root,
 	}
 
+	// Since these endpoints are API version independent, they are defined here instead of api4 package
 	web.InitOAuth()
 	web.InitWebhooks()
 	web.InitSaml()
+	web.InitLti()
 	web.InitStatic()
 
 	return web

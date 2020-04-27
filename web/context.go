@@ -25,6 +25,22 @@ type Context struct {
 	siteURLHeader string
 }
 
+func (c *Context) Logout(w http.ResponseWriter, r *http.Request) {
+	auditRec := c.MakeAuditRecord("Logout", audit.Fail)
+	defer c.LogAuditRec(auditRec)
+	c.LogAudit("")
+
+	c.RemoveSessionCookie(w, r)
+	if c.App.Session().Id != "" {
+		if err := c.App.RevokeSessionById(c.App.Session().Id); err != nil {
+			c.Err = err
+			return
+		}
+	}
+
+	auditRec.Success()
+}
+
 // LogAuditRec logs an audit record using default LevelAPI.
 func (c *Context) LogAuditRec(rec *audit.Record) {
 	c.LogAuditRecWithLevel(rec, app.LevelAPI)

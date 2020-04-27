@@ -340,6 +340,7 @@ type UserStore interface {
 	GetProfileByGroupChannelIdsForUser(userId string, channelIds []string) (map[string][]*model.User, error)
 	InvalidateProfileCacheForUser(userId string)
 	GetByEmail(email string) (*model.User, error)
+	GetByLTI(ltiUserID string) (*model.User, *model.AppError)
 	GetByAuth(authData *string, authService string) (*model.User, error)
 	GetAllUsingAuthService(authService string) ([]*model.User, error)
 	GetAllNotInAuthService(authServices []string) ([]*model.User, error)

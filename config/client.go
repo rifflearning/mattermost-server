@@ -252,6 +252,8 @@ func GenerateLimitedClientConfig(c *model.Config, telemetryID string, license *m
 
 	props["EnableSignUpWithGitLab"] = strconv.FormatBool(*c.GitLabSettings.Enable)
 
+	props["EnableSignUpWithLTI"] = strconv.FormatBool(c.LTISettings.Enable)
+
 	props["TermsOfServiceLink"] = *c.SupportSettings.TermsOfServiceLink
 	props["PrivacyPolicyLink"] = *c.SupportSettings.PrivacyPolicyLink
 	props["AboutLink"] = *c.SupportSettings.AboutLink
