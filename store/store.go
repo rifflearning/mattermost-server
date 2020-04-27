@@ -286,6 +286,7 @@ type UserStore interface {
 	GetProfileByGroupChannelIdsForUser(userId string, channelIds []string) (map[string][]*model.User, *model.AppError)
 	InvalidateProfileCacheForUser(userId string)
 	GetByEmail(email string) (*model.User, *model.AppError)
+	GetByLTI(ltiUserID string) (*model.User, *model.AppError)
 	GetByAuth(authData *string, authService string) (*model.User, *model.AppError)
 	GetAllUsingAuthService(authService string) ([]*model.User, *model.AppError)
 	GetByUsername(username string) (*model.User, *model.AppError)
