@@ -428,15 +428,15 @@ func (us SqlUserStore) GetProfilesInChannel(channelId string, offset int, limit 
 		var users []*model.User
 
 		query := `
-				SELECT 
-					Users.* 
-				FROM 
-					Users, ChannelMembers 
-				WHERE 
-					ChannelMembers.ChannelId = :ChannelId 
-					AND Users.Id = ChannelMembers.UserId 
-				ORDER BY 
-					Users.Username ASC 
+				SELECT
+					Users.*
+				FROM
+					Users, ChannelMembers
+				WHERE
+					ChannelMembers.ChannelId = :ChannelId
+					AND Users.Id = ChannelMembers.UserId
+				ORDER BY
+					Users.Username ASC
 				LIMIT :Limit OFFSET :Offset
 		`
 
@@ -458,21 +458,21 @@ func (us SqlUserStore) GetProfilesInChannelByStatus(channelId string, offset int
 		var users []*model.User
 
 		query := `
-			SELECT 
+			SELECT
 				Users.*
 			FROM Users
 				INNER JOIN ChannelMembers ON Users.Id = ChannelMembers.UserId
 				LEFT JOIN Status  ON Users.Id = Status.UserId
 			WHERE
 				ChannelMembers.ChannelId = :ChannelId
-			ORDER BY 
+			ORDER BY
 				CASE Status
 					WHEN 'online' THEN 1
 					WHEN 'away' THEN 2
 					WHEN 'dnd' THEN 3
 					ELSE 4
 				END,
-				Users.Username ASC 
+				Users.Username ASC
 			LIMIT :Limit OFFSET :Offset
 		`
 
@@ -782,6 +782,18 @@ func (us SqlUserStore) GetByEmail(email string) store.StoreChannel {
 
 		if err := us.GetReplica().SelectOne(&user, "SELECT * FROM Users WHERE Email = :Email", map[string]interface{}{"Email": email}); err != nil {
 			result.Err = model.NewAppError("SqlUserStore.GetByEmail", store.MISSING_ACCOUNT_ERROR, nil, "email="+email+", "+err.Error(), http.StatusInternalServerError)
+		}
+
+		result.Data = &user
+	})
+}
+
+func (us SqlUserStore) GetByLTI(ltiUserID string) store.StoreChannel {
+	return store.Do(func(result *store.StoreResult) {
+		user := model.User{}
+
+		if err := us.GetReplica().SelectOne(&user, "SELECT * FROM Users WHERE Props LIKE :LtiProp", map[string]interface{}{"LtiProp": fmt.Sprintf("%%\"%s\":\"%s\"%%", model.LTI_USER_ID_PROP_KEY, ltiUserID)}); err != nil {
+			result.Err = model.NewAppError("SqlUserStore.GetByLTI", store.MISSING_LTI_ACCOUNT_ERROR, nil, "ltiUserID="+ltiUserID+", "+err.Error(), http.StatusBadRequest)
 		}
 
 		result.Data = &user

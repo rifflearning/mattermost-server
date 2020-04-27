@@ -784,6 +784,7 @@ func GenerateLimitedClientConfig(c *model.Config, diagnosticId string, license *
 	props["EnableCustomBrand"] = strconv.FormatBool(*c.TeamSettings.EnableCustomBrand)
 	props["CustomBrandText"] = *c.TeamSettings.CustomBrandText
 	props["CustomDescriptionText"] = *c.TeamSettings.CustomDescriptionText
+	props["EnableSignUpWithLTI"] = strconv.FormatBool(c.LTISettings.Enable)
 
 	if license != nil {
 		if *license.Features.LDAP {

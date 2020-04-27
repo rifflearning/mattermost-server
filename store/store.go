@@ -252,6 +252,7 @@ type UserStore interface {
 	GetProfileByIds(userId []string, allowFromCache bool) StoreChannel
 	InvalidatProfileCacheForUser(userId string)
 	GetByEmail(email string) StoreChannel
+	GetByLTI(ltiUserID string) StoreChannel
 	GetByAuth(authData *string, authService string) StoreChannel
 	GetAllUsingAuthService(authService string) StoreChannel
 	GetByUsername(username string) StoreChannel

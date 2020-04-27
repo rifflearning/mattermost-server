@@ -242,6 +242,22 @@ func (_m *UserStore) GetByEmail(email string) store.StoreChannel {
 	return r0
 }
 
+// GetByLTI provides a mock function with given fields: ltiUserID
+func (_m *UserStore) GetByLTI(ltiUserID string) store.StoreChannel {
+	ret := _m.Called(ltiUserID)
+
+	var r0 store.StoreChannel
+	if rf, ok := ret.Get(0).(func(string) store.StoreChannel); ok {
+		r0 = rf(ltiUserID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(store.StoreChannel)
+		}
+	}
+
+	return r0
+}
+
 // GetByUsername provides a mock function with given fields: username
 func (_m *UserStore) GetByUsername(username string) store.StoreChannel {
 	ret := _m.Called(username)

@@ -31,6 +31,17 @@ type Context struct {
 	siteURLHeader string
 }
 
+func (c *Context) Logout(w http.ResponseWriter, r *http.Request) {
+	c.LogAudit("")
+	c.RemoveSessionCookie(w, r)
+	if c.Session.Id != "" {
+		if err := c.App.RevokeSessionById(c.Session.Id); err != nil {
+			c.Err = err
+			return
+		}
+	}
+}
+
 func (c *Context) LogAudit(extraInfo string) {
 	audit := &model.Audit{UserId: c.Session.UserId, IpAddress: c.IpAddress, Action: c.Path, ExtraInfo: extraInfo, SessionId: c.Session.Id}
 	if r := <-c.App.Srv.Store.Audit().Save(audit); r.Err != nil {
