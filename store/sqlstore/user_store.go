@@ -1361,3 +1361,514 @@ func (us SqlUserStore) InferSystemInstallDate() store.StoreChannel {
 		result.Data = createAt
 	})
 }
+
+// This function will run an sql query and return all relevant user interactions for the current user in the current mattermost team
+// Each result row will be of type UserInteraction (defined in model/user.go)
+// TODO: Break the query in this function into smaller, more maintainable queries perhaps using a query builder
+func (us *SqlUserStore) GetUserInteractions(userId string, teamId string, learningGroupTypes []*model.LearningGroupType) store.StoreChannel {
+
+	// For every learning group type for this team, use this case statement
+	// to record the interaction in this learning group type's context (ex. plg)
+	prefixQuery := ""
+
+	for _, learningGroupType := range learningGroupTypes {
+		prefixQuery += `
+			WHEN Channels.Type = 'P'
+			AND LEFT(Channels.Name,` + strconv.Itoa(len(learningGroupType.Prefix)+1) + `) = '` + learningGroupType.Prefix + `-'
+			THEN LEFT(Channels.Name,` + strconv.Itoa(len(learningGroupType.Prefix)) + `)
+		`
+	}
+
+	// If there are no learning group types, create negative test case to default as 'course'
+	// No types means: this mattermost team is not associated with a course
+	if len(prefixQuery) == 0 {
+		prefixQuery = " WHEN 1 != 1 THEN '' "
+	}
+
+	return store.Do(func(result *store.StoreResult) {
+		query :=
+			`
+			SELECT * FROM (
+
+				(-- Reactions - Not Recipient
+				SELECT 'Reaction' AS 'InteractionType',
+				Users.Username,
+				0 AS 'IsRecipient',
+				CASE
+				    ` + prefixQuery + `
+				    ELSE 'course'
+
+				END AS 'Context',
+				Channels.Type AS 'ChannelType',
+				Channels.Name AS 'ChannelSlugName',
+				Channels.DisplayName AS 'ChannelDisplayName'
+
+				    FROM Reactions
+
+				    JOIN Users
+				    ON Users.Id = (SELECT UserId FROM Posts WHERE Id = Reactions.PostId)
+
+				    JOIN Posts
+				    ON Posts.Id = Reactions.PostId
+
+				    JOIN Channels
+				    ON Channels.Id = Posts.ChannelId
+						AND (Channels.TeamID = :teamId OR Channels.Type IN ('D', 'G'))
+
+				WHERE Reactions.UserId = :userId
+				AND Posts.UserId != :userId
+				)
+
+				UNION ALL
+
+				(-- Reactions - Is Recipient
+				SELECT 'Reaction' AS 'InteractionType',
+				Users.Username,
+				1 AS 'IsRecipient',
+				CASE
+						` + prefixQuery + `
+						ELSE 'course'
+
+				END AS 'Context',
+				Channels.Type AS 'ChannelType',
+				Channels.Name AS 'ChannelSlugName',
+				Channels.DisplayName AS 'ChannelDisplayName'
+
+				    FROM Reactions
+
+				    JOIN Posts
+				    ON Reactions.PostId = Posts.Id
+
+				    JOIN Users
+				    ON Users.Id = Reactions.UserId
+
+				    JOIN Channels
+				    ON Channels.Id = Posts.ChannelId
+						AND (Channels.TeamID = :teamId OR Channels.Type IN ('D', 'G'))
+
+				WHERE Posts.UserId = :userId
+				AND Reactions.UserId != :userId
+				)
+
+				UNION ALL
+
+				(-- Mentions -Recipient AND Not Recipient
+				SELECT 'Mention' AS 'InteractionType',
+				CASE
+				    WHEN
+				        Mentioner.Id = :userId
+				        THEN Mentionee.Username
+				    WHEN
+				        Mentionee.Id = :userId
+				        THEN Mentioner.Username
+				END AS 'Username',
+				CASE
+				    WHEN
+				        Mentioner.Id = :userId
+				        THEN 0
+				    WHEN
+				        Mentionee.Id = :userId
+				        THEN 1
+				END AS 'IsRecipient',
+				CASE
+						` + prefixQuery + `
+						ELSE 'course'
+
+				END AS 'Context',
+				Channels.Type AS 'ChannelType',
+				Channels.Name AS 'ChannelSlugName',
+				Channels.DisplayName AS 'ChannelDisplayName'
+
+				    FROM Users Mentionee
+
+				    JOIN Posts
+				    ON Message LIKE (CONCAT('%@',Mentionee.Username,'%'))
+
+				    JOIN Users Mentioner
+				    ON Mentioner.Id = Posts.UserId
+
+				    JOIN Channels
+				    ON Channels.Id = Posts.ChannelId
+						AND (Channels.TeamID = :teamId OR Channels.Type IN ('D', 'G'))
+
+				WHERE ((Mentioner.Id = :userId AND Mentionee.Id != :userId)
+				OR (Mentionee.Id = :userId AND Mentioner.Id != :userId))
+				)
+
+				UNION ALL
+
+				(-- Replies -Recipient AND Not Recipient
+				SELECT 'Reply' AS 'InteractionType',
+				CASE
+				    WHEN
+				        Reply.UserId = :userId
+				        THEN Replyee.Username
+				    WHEN
+				        OriginalPost.UserId = :userId
+				        THEN Replier.Username
+				END AS 'Username',
+				CASE
+				    WHEN
+				        Reply.UserId = :userId
+				        THEN 0
+				    WHEN
+				        OriginalPost.UserId = :userId
+				        THEN 1
+				END AS 'IsRecipient',
+				CASE
+						` + prefixQuery + `
+						ELSE 'course'
+
+				END AS 'Context',
+				Channels.Type AS 'ChannelType',
+				Channels.Name AS 'ChannelSlugName',
+				Channels.DisplayName AS 'ChannelDisplayName'
+
+				  FROM Posts Reply
+
+				    JOIN Posts OriginalPost
+				    ON OriginalPost.Id = Reply.ParentId
+
+				    JOIN Channels
+				    ON Channels.Id = Reply.ChannelId
+						AND Channels.TeamID = :teamId
+
+				    JOIN Users Replier
+				    ON Replier.Id = Reply.UserId
+
+				    JOIN Users Replyee
+				    ON Replyee.Id = OriginalPost.UserId
+
+				WHERE Reply.ParentId != ''
+				AND Channels.Type NOT IN ('D', 'G')
+				AND Reply.OriginalId = ''
+				AND OriginalPost.OriginalId = ''
+				AND ((Reply.UserId = :userId AND OriginalPost.UserId != :userId) OR
+				(OriginalPost.UserId = :userId AND Reply.UserId != :userId))
+				)
+
+				UNION ALL
+
+				(-- Direct Messages -Recipient AND Not Recipient
+				SELECT 'DirectMessage' AS 'InteractionType',
+				CASE
+				    WHEN
+				        PostAuthor.Id = :userId
+				        THEN PostRecipient.Username
+				    ELSE PostAuthor.Username
+				END AS 'Username',
+				CASE
+				    WHEN
+				        PostAuthor.Id = :userId
+				        THEN 0
+				    ELSE 1
+				END AS 'IsRecipient',
+				'course' AS 'Context',
+				Channels.Type AS 'ChannelType',
+				Channels.Name AS 'ChannelSlugName',
+				Channels.DisplayName AS 'ChannelDisplayName'
+
+				    FROM Posts
+
+				    JOIN Users PostAuthor -- Sender of the direct message
+				    ON PostAuthor.Id = Posts.UserId
+
+				    JOIN Users PostRecipient
+				    ON PostRecipient.Id IN (SELECT UserId
+				                                FROM ChannelMembers CH
+				                            WHERE CH.ChannelId = Posts.ChannelId
+				                            AND UserId != :userId)
+				    JOIN Channels
+				    ON Channels.Id = Posts.ChannelId
+
+				    JOIN ChannelMembers
+				    ON ChannelMembers.ChannelId = Channels.Id
+				    AND ChannelMembers.UserId = :userId
+
+				WHERE Channels.Type = 'D'
+				AND Posts.OriginalId = ''
+				)
+
+				UNION ALL ( -- all posts and replies in group messaging channels (Channels.Type = 'G')
+				SELECT
+				CASE
+				    WHEN
+				        TargetInteraction.InteractionType = 'DirectMessage' -- a catch all, all posts in group messages that are not replies, will be recorded as direct messages
+				        OR
+				        (TargetInteraction.InteractionType = 'Reply' -- reply, NOT written by current user, to a post that the current user DID NOT write, record a direct message to current user
+				        AND TargetInteraction.UserId != :userId
+				        AND Parent_Post_Author_Id != :userId)
+				        OR
+				        (TargetInteraction.InteractionType = 'Reply' -- reply, written by current user, record a direct message to all users in channel besides parent post's author
+				        AND TargetInteraction.UserId = :userId
+				        AND Parent_Post_Author_Id != ChannelMembers.UserId)
+
+				        THEN 'DirectMessage'
+				    WHEN
+				        (TargetInteraction.InteractionType = 'Reply'-- reply, NOT written by current user, and this user is the author of the parent post (mark as reply to that user)
+				        AND TargetInteraction.UserId != :userId
+				        AND Parent_Post_Author_Id = :userId)
+				        OR
+				        (TargetInteraction.InteractionType = 'Reply' -- reply, written by current user, record as reply to author of parent post (if author of parent post isn't the current user)
+				        AND TargetInteraction.UserId = :userId
+				        AND Parent_Post_Author_Id != :userId
+				        AND Parent_Post_Author_Id = ChannelMembers.UserId)
+
+				        THEN 'Reply'
+				END AS 'InteractionType',
+				CASE
+				    WHEN
+				        TargetInteraction.UserId != :userId
+				        THEN TargetInteraction.Username
+				        ELSE ChannelMembersUsers.Username
+				END AS 'Username',
+				CASE
+				    WHEN
+				        TargetInteraction.UserId != :userId
+				        THEN 1
+				        ELSE 0
+				END AS 'IsRecipient',
+				'course' AS 'Context',
+				ChannelType,
+				ChannelSlugName,
+				ChannelDisplayName
+
+				    FROM ChannelMembers
+
+				    JOIN Users ChannelMembersUsers
+				    ON ChannelMembersUsers.Id = ChannelMembers.UserId
+
+				    JOIN (
+					        SELECT
+					        CASE
+					            WHEN
+					                Posts.ParentId = ''
+					                THEN 'DirectMessage'
+					            ELSE 'Reply'
+					        END AS 'InteractionType',
+					        ChannelMembersUsers.Id AS 'UserId',
+					        ChannelMembersUsers.Username AS 'Username',
+					        Channels.Id AS 'ChannelId',
+					        ParentPostAuthor.Id AS 'Parent_Post_Author_Id',
+					        Posts.Id AS 'PostId',
+					        Channels.Type AS 'ChannelType',
+					        Channels.Name AS 'ChannelSlugName',
+									Channels.DisplayName AS 'ChannelDisplayName'
+
+
+					            FROM Posts
+
+					            JOIN Users ChannelMembersUsers
+					            ON ChannelMembersUsers.Id = Posts.UserId
+
+					            LEFT JOIN Users ParentPostAuthor -- if the post is a reply, then get the parent post's author's id
+					            ON ParentPostAuthor.Id = (SELECT UserId FROM Posts ParentPost WHERE ParentPost.Id = Posts.ParentId)
+
+					            JOIN Channels
+					            ON Channels.Id = Posts.ChannelId
+
+											JOIN ChannelMembers
+					            ON ChannelMembers.ChannelId = Channels.Id
+					            AND ChannelMembers.UserId = :userId
+
+					        WHERE Channels.Type = 'G'
+					        AND Posts.OriginalId = ''
+				    		) TargetInteraction
+				    ON TargetInteraction.ChannelId = ChannelMembers.ChannelId
+
+				WHERE (TargetInteraction.InteractionType = 'DirectMessage' -- direct message from someone other than current user in group channel
+				        AND TargetInteraction.UserId != :userId
+				        AND ChannelMembers.UserId = :userId)
+
+				OR  (TargetInteraction.InteractionType = 'DirectMessage' -- direct message from current user in group channel
+				    AND TargetInteraction.UserId = :userId
+				    AND ChannelMembers.UserId != :userId)
+
+				OR (TargetInteraction.InteractionType = 'Reply' -- reply, not written by current user, to a post that the current user IS an author of, in a group channel
+				        AND TargetInteraction.UserId != :userId
+				        AND Parent_Post_Author_Id = :userId
+				        AND ChannelMembersUsers.Id = :userId) -- just want one user returned from channel members (the current user) (will record as a reply)
+
+				OR (TargetInteraction.InteractionType = 'Reply' -- reply, not written by current user, to a post that the current user IS NOT an author of, in a group channel
+				        AND TargetInteraction.UserId != :userId
+				        AND Parent_Post_Author_Id != :userId
+				        AND ChannelMembersUsers.Id = :userId) -- just want one user returned from channel members (the current user) (will record as a DM)
+
+				OR (TargetInteraction.InteractionType = 'Reply' -- reply, written by current user, to a post that the current user IS NOT an author of, in a group channel
+				        AND TargetInteraction.UserId = :userId
+				        AND Parent_Post_Author_Id != :userId
+				        AND ChannelMembersUsers.Id != :userId)
+
+				OR (TargetInteraction.InteractionType = 'Reply' -- reply, written by current user, to a post that the current user IS an author of, in a group channel
+				        AND TargetInteraction.UserId = :userId
+				        AND Parent_Post_Author_Id = :userId
+				        AND ChannelMembersUsers.Id != :userId)
+				)
+
+				UNION ALL
+
+				(-- Posts by current user in Public and Private channels
+				SELECT 'Post' AS 'InteractionType',
+				NULL AS 'Username',
+				0 AS 'IsRecipient',
+				CASE
+						` + prefixQuery + `
+						ELSE 'course'
+
+				END AS 'Context',
+				Channels.Type AS 'ChannelType',
+				Channels.Name AS 'ChannelSlugName',
+				Channels.DisplayName AS 'ChannelDisplayName'
+
+				    FROM Posts
+
+				    JOIN Channels
+				    ON Channels.Id = Posts.ChannelId
+						AND Channels.Type IN ('O', 'P')
+						AND Channels.TeamId = :teamId
+
+				WHERE Posts.OriginalId = ''
+				AND Posts.ParentId = '' -- dont count replies here
+				AND Posts.UserId = :userId
+				AND Posts.Type = '' -- System posts (ex. John joined the channel), are technically posted by the user's Id
+				)
+			) AS UserInteractions
+
+			WHERE (Username IN (SELECT Username -- all interactions must take place with users on your team (unless type is 'Post')
+			                          FROM Users
+
+			                            JOIN TeamMembers
+			                            ON TeamMembers.TeamID = :teamId
+			                            AND TeamMembers.UserId = Users.Id
+			                        ) OR InteractionType = 'Post')
+			`
+		var userInteractions []*model.UserInteraction
+
+		if _, err := us.GetReplica().Select(&userInteractions, query, map[string]interface{}{"userId": userId, "teamId": teamId}); err != nil {
+			result.Err = model.NewAppError("SqlUserStore.GetUserInteractions", "store.sql_post.ge_user_interactions.app_error", nil, err.Error(), http.StatusInternalServerError)
+		}
+
+		result.Data = userInteractions
+	})
+}
+
+// This function will run an sql query and, using the learningGroupTypes as a reference, return all learning groups that this user is a member of
+//     ex. if 'capstone' is a learning group type, and this user is a member of a private channel named 'capstone-30', then that channel is considered a learning group
+// Each result row will be of type LearningGroup (defined in model/user.go)
+func (us *SqlUserStore) GetUserLearningGroups(userId string, teamId string, learningGroupTypes []*model.LearningGroupType) store.StoreChannel {
+	// For every learning group type for this team, use this case statement
+	// to record a name for this channel(team), minus the prefix (ex. plg-30 => 30)
+	prefixReplaceQuery := ""
+
+	for _, learningGroupType := range learningGroupTypes {
+		prefixReplaceQuery += `
+		WHEN LEFT(Channels.Name,` + strconv.Itoa(len(learningGroupType.Prefix)+1) + `) = '` + learningGroupType.Prefix + `-'
+		THEN REPLACE(Channels.Name,'` + learningGroupType.Prefix + `-','')
+		`
+	}
+
+	// If there are no learning group types, then '' as team name,
+	// since this should be a 1 to 1 relationship
+	if len(prefixReplaceQuery) == 0 {
+		prefixReplaceQuery = " WHEN 1 = 1 THEN '' "
+	}
+
+	// For every learning group type for this team, use this case statement
+	// to get a team type for this channel(team) (ex. plg-30 => plg)
+	prefixQuery := ""
+
+	for _, learningGroupType := range learningGroupTypes {
+		prefixQuery += `
+		WHEN LEFT(Channels.Name,` + strconv.Itoa(len(learningGroupType.Prefix)+1) + `) = '` + learningGroupType.Prefix + `-'
+		THEN '` + learningGroupType.Prefix + `'
+		`
+	}
+
+	// If there are no learning group types, then '' as team type,
+	// since this should be a 1 to 1 relationship
+	if len(prefixQuery) == 0 {
+		prefixQuery = " WHEN 1 = 1 THEN '' "
+	}
+
+	// For every learning group type for this team, use this case statement
+	// to find all channels with a name that starts with the prefix
+	prefixFilterQuery := ""
+
+	for _, learningGroupType := range learningGroupTypes {
+		if len(prefixFilterQuery) > 0 {
+			prefixFilterQuery += " OR "
+		}
+		prefixFilterQuery += `
+		LEFT(Channels.Name,` + strconv.Itoa(len(learningGroupType.Prefix)+1) + `) = '` + learningGroupType.Prefix + `-'
+		`
+	}
+
+	// If there are no learning group types, then use 1 != 1 to return no results,
+	// since no types means no learning group channels
+	if len(prefixFilterQuery) == 0 {
+		prefixFilterQuery = " 1 != 1 "
+	}
+
+	return store.Do(func(result *store.StoreResult) {
+		query :=
+			`
+				SELECT
+				CASE
+				` + prefixReplaceQuery + `
+				END AS 'LearningGroupName',
+				CASE
+				` + prefixQuery + `
+				END AS 'LearningGroupPrefix',
+				Channels.Id AS 'ChannelId',
+				Channels.Name AS 'ChannelSlugName',
+				Channels.DisplayName AS 'ChannelDisplayName',
+				(
+				SELECT GROUP_CONCAT(
+									CONCAT(Users.id,',',Users.Username)
+									SEPARATOR ';'
+								)
+
+				    FROM Users
+				WHERE Users.Id IN (SELECT UserId
+                               FROM ChannelMembers CM
+                           WHERE CM.ChannelId = Channels.Id
+                           AND UserId != :userId
+                           )
+				) AS 'Members',
+
+				(
+					SELECT CASE
+							WHEN ChannelMemberHistory.LeaveTime != ''
+								OR ChannelMemberHistory.JoinTime < ChannelMemberHistory.LeaveTime
+							THEN 1
+							ELSE 0
+					END AS 'HasLeftGroup'
+
+					FROM  ChannelMemberHistory
+
+					WHERE ChannelMemberHistory.ChannelID = Channels.Id
+					AND ChannelMemberHistory.UserID = :userId
+					ORDER BY ChannelMemberHistory.JoinTime DESC
+					LIMIT 1
+				) AS 'HasLeftGroup'
+
+				    FROM Channels
+
+						JOIN ChannelMemberHistory
+						ON ChannelMemberHistory.UserID = :userId
+						AND ChannelMemberHistory.ChannelID = Channels.Id
+
+				WHERE Channels.TeamID = :teamId
+				AND Channels.Type = 'P'
+				AND
+				(` + prefixFilterQuery + `)
+			`
+		var userTeams []*model.LearningGroupQueryRow
+
+		if _, err := us.GetReplica().Select(&userTeams, query, map[string]interface{}{"userId": userId, "teamId": teamId}); err != nil {
+			result.Err = model.NewAppError("SqlUserStore.GetLearningGroups", "store.sql_post.get_user_teams.app_error", nil, err.Error(), http.StatusInternalServerError)
+		}
+
+		result.Data = userTeams
+	})
+}

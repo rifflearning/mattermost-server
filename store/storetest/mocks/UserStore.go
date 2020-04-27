@@ -848,3 +848,35 @@ func (_m *UserStore) VerifyEmail(userId string) store.StoreChannel {
 
 	return r0
 }
+
+// GetUserInteractions provides a mock function with given fields: uid, teamId, learningGroupTypes
+func (_m *UserStore) GetUserInteractions(uid string, teamId string, learningGroupTypes []*model.LearningGroupType) store.StoreChannel {
+	ret := _m.Called()
+
+	var r0 store.StoreChannel
+	if rf, ok := ret.Get(0).(func() store.StoreChannel); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(store.StoreChannel)
+		}
+	}
+
+	return r0
+}
+
+// GetUserTeams provides a mock function with given fields: uid, teamId, learningGroupTypes
+func (_m *UserStore) GetUserLearningGroups(uid string, teamId string, learningGroupTypes []*model.LearningGroupType) store.StoreChannel {
+	ret := _m.Called()
+
+	var r0 store.StoreChannel
+	if rf, ok := ret.Get(0).(func() store.StoreChannel); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(store.StoreChannel)
+		}
+	}
+
+	return r0
+}

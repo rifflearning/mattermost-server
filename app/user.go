@@ -19,6 +19,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -1633,4 +1634,164 @@ func (a *App) RecordUserTermsOfServiceAction(userId, termsOfServiceId string, ac
 	}
 
 	return nil
+}
+
+func (a *App) GetUserAnalytics(userId string, teamId string, name string) (*model.UserAnalytics, *model.AppError) {
+	// Is a placeholder for the result of all assertion tests in this function
+	var assertionSuccess bool
+
+	// Initialize returnData struct as UserInteractions type
+	// returnData will contain all datasets related to user analytics
+	// Find the definition of the UserAnalytics type in model/user.go
+	returnData := new(model.UserAnalytics)
+
+	// Always return the target user's id as a data set
+	returnData.TargetUser = userId
+
+	// Instantiate learningGroupTypes and error structs
+	// They will be used to store the results of a.GetLearningGroupTypes(teamId) below
+	var learningGroupTypes []*model.LearningGroupType
+	var err *model.AppError
+
+	// Get learning group types (ex. 'plg' or 'capstone')
+	// Learning group types are used to identify private channels that
+	// were automatically generated for a learning group
+	//     Ex. If a private channel's name is 'plg-30', and the following function
+	//         returns 'plg' as a learning group prefix, then we can reasonably assert
+	//         that channel 'plg-30', was an automatically generated private channel
+	//         for a learning group of type 'plg'
+	if learningGroupTypes, err = a.GetLearningGroupTypes(teamId); err != nil {
+		// Return and exit from GetUserAnalytics with error
+		return nil, err
+	}
+
+	// Add learningGroupTypes to return data (always return learning group types)
+	// Assert as type 'array of pointers to LearningGroupType structs'
+	if returnData.LearningGroupTypes, assertionSuccess = interface{}(learningGroupTypes).([]*model.LearningGroupType); !assertionSuccess {
+		// Return and exit from GetUserAnalytics with error
+		return nil, model.NewAppError("GetUserAnalytics", "api.user.get_user_analytics.learning_group_prefix_assertion_error", nil, "", http.StatusBadRequest)
+	}
+
+	// Manually check what data set is being requested
+	if name == "UserInteractions" {
+		if userInteractions := <-a.Srv.Store.User().GetUserInteractions(userId, teamId, learningGroupTypes); userInteractions.Err != nil {
+			// Return and exit from GetUserAnalytics with error
+			return nil, userInteractions.Err
+		} else {
+			// Add UserInteractions data to the returnData object
+			// Assert as type 'array of pointers to UserInteraction structs'
+			if returnData.UserInteractions, assertionSuccess = userInteractions.Data.([]*model.UserInteraction); !assertionSuccess {
+				// Return and exit from GetUserAnalytics with error
+				return nil, model.NewAppError("GetUserAnalytics", "api.user.get_user_analytics.user_interaction_assertion_error", nil, "", http.StatusBadRequest)
+			}
+		}
+	}
+
+	// Always return the user's learning groups
+	userLearningGroupsQueryResult := <-a.Srv.Store.User().GetUserLearningGroups(userId, teamId, learningGroupTypes)
+	if userLearningGroupsQueryResult.Err != nil {
+		// Return and exit from GetUserAnalytics with error
+		return nil, userLearningGroupsQueryResult.Err
+	} else {
+
+		userLearningGroupsQueryRows := userLearningGroupsQueryResult.Data.([]*model.LearningGroupQueryRow)
+		var userLearningGroups []*model.LearningGroup = make([]*model.LearningGroup, len(userLearningGroupsQueryRows))
+
+		//mlog.Debug("GetUserAnalytics: user learning groups", mlog.Any("userLearningGroupsQueryRows", userLearningGroupsQueryRows))
+
+		// Loop over learning group query rows and create a learning group for each
+		// Also, for each learning group, if it has members, create LearningGroupMember structs for each member
+		// Note: in a learning group query row, members is a double delimited string of users (; delimited) and
+		// each user's id and username (, delimited)
+
+		for i, userLearningGroupQueryRow := range userLearningGroupsQueryRows {
+			userLearningGroup := model.LearningGroup{
+				LearningGroupName:   userLearningGroupQueryRow.LearningGroupName,
+				LearningGroupPrefix: userLearningGroupQueryRow.LearningGroupPrefix,
+				ChannelId:           userLearningGroupQueryRow.ChannelId,
+				ChannelSlugName:     userLearningGroupQueryRow.ChannelSlugName,
+				ChannelDisplayName:  userLearningGroupQueryRow.ChannelDisplayName,
+				HasLeftGroup:        userLearningGroupQueryRow.HasLeftGroup,
+			}
+			userLearningGroups[i] = &userLearningGroup
+
+			if userLearningGroupQueryRow.Members == nil {
+				continue
+			}
+
+			usersInLearningGroup := strings.Split(*userLearningGroupQueryRow.Members, ";")
+			membersArray := make([]model.LearningGroupMember, len(usersInLearningGroup))
+
+			for j, user := range usersInLearningGroup {
+				userData := strings.Split(user, ",")
+				membersArray[j] = model.LearningGroupMember{Id: userData[0], Username: userData[1]}
+			}
+
+			userLearningGroups[i].Members = membersArray
+		}
+
+		// Add LearningGroups data to the returnData object
+		// Assert as type 'array of pointers to LearningGroup structs'
+		if returnData.UserLearningGroups, assertionSuccess = interface{}(userLearningGroups).([]*model.LearningGroup); !assertionSuccess {
+			// Return and exit from GetUserAnalytics with error
+			return nil, model.NewAppError("GetUserAnalytics", "api.user.get_user_analytics.learning_group_assertion_error", nil, "", http.StatusBadRequest)
+		}
+	}
+
+	// Return returnData, which is of type UserAnalytics, and nil as error
+	return returnData, nil
+}
+
+// Get the learning group types for the specified team
+//
+// Learning group types only exist if the specified team is associated with an
+// LMS course used for LTI sign-in which has personal channels defined.
+//
+// Each personal channel of an LMS defines a type of learning group. The names
+// of these personal channels are unique and are used as a prefix when determining
+// the private learning group channel of that type for a user signing in from an LMS.
+//
+// Currently the only property of a LearngGroupType is that prefix string. And the
+// value of that prefix uniquely identifies that LearningGroupType.
+//
+//     ex. if we determine that a learning group type has a prefix of 'capstone',
+//         then we can reasonably assert that any private channel whose name is
+//         prefixed with 'capstone-', is a learning group channel of that type and the
+//         users that are a member of that channel belong to that
+//         learning group.
+//
+//         This is used by GetUserAnalytics to analyze interactions between the
+//         members of that group.
+func (a *App) GetLearningGroupTypes(teamId string) ([]*model.LearningGroupType, *model.AppError) {
+	// Get mattermost team data
+	// Really just need Team.Name, which is equal to the team slug
+	var currentTeamSlug string
+	if result := <-a.Srv.Store.Team().Get(teamId); result.Err != nil {
+		return nil, result.Err
+	} else {
+		currentTeam := result.Data.(*model.Team)
+		currentTeamSlug = currentTeam.Name
+	}
+
+	var learningGroupTypes []*model.LearningGroupType
+
+	// Find the LMS that has a contextId (course) mapped to the current team
+	for _, lms := range a.Config().LTISettings.GetKnownLMSs() {
+		if lms.IsLMSForTeam(currentTeamSlug) {
+			personalChannelNames := lms.GetPersonalChannelNames()
+
+			// Create a LearningGroupType for each personal channel
+			learningGroupTypes = make([]*model.LearningGroupType, len(personalChannelNames))
+			for i, channelName := range personalChannelNames {
+				learningGroupTypes[i] = &model.LearningGroupType{Prefix: channelName}
+			}
+		}
+	}
+
+	// Sort the learning group types by prefix so the same set of types is always returned in the same order
+	sort.Slice(learningGroupTypes[:], func(i, j int) bool {
+		return learningGroupTypes[i].Prefix < learningGroupTypes[j].Prefix
+	})
+
+	return learningGroupTypes, nil
 }

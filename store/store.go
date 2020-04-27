@@ -283,6 +283,8 @@ type UserStore interface {
 	ClearAllCustomRoleAssignments() StoreChannel
 	InferSystemInstallDate() StoreChannel
 	GetAllAfter(limit int, afterId string) StoreChannel
+	GetUserInteractions(userId string, teamId string, learningGroupTypes []*model.LearningGroupType) StoreChannel
+	GetUserLearningGroups(userId string, teamId string, learningGroupTypes []*model.LearningGroupType) StoreChannel
 }
 
 type SessionStore interface {

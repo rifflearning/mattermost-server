@@ -47,6 +47,117 @@ const (
 	USER_PASSWORD_MAX_LENGTH  = 72
 )
 
+// This is a struct for a user interaction
+// A user interaction will represent one row in the results of the
+// GetUserInteractions query in store/sqlstore/user_store.go
+type UserInteraction struct {
+	// The type of interaction
+	// enum('Reaction', 'Mention', 'Reply', 'DirectMessage')
+	InteractionType string `json:"interaction_type"`
+
+	// The username of the user that this interaction took place with
+	// Use pointer because interactions of type 'Post' will not have a corresponding username
+	Username *string `json:"username"`
+
+	// Denotes whether or not the current user was the recipient of this interaction
+	IsRecipient bool `json:"is_recipient"`
+
+	// The context in which this interaction occurred (either 'Course' or the learning group type's prefix (ex. 'plg'))
+	Context string `json:"context"`
+
+	// The type of channel that this interaction took place in
+	// enum('P', 'O', 'D', 'G')
+	//     P = private channel
+	//     O = public channel
+	//     D = direct message (1 on 1)
+	//     G = group direct message
+	ChannelType string `json:"channel_type"`
+
+	// The slug name of the channel that this interaction took place in (Channels.Name)
+	ChannelSlugName string `json:"channel_slug_name"`
+}
+
+// This is a struct for a learning group type
+// Each learning group type is derived from personal channel names found in the config
+type LearningGroupType struct {
+	// ex. 'capstone'
+	Prefix string `json:"prefix"`
+}
+
+// This is a struct for all user analytics data sets
+// This is the struct that gets returned to mattermost-redux in the users/{userId}/teams/{teamId}/useranalytics request
+// **Note: Using pointers as property types allows for null values
+type UserAnalytics struct {
+	TargetUser         string               `json:"TargetUser"`
+	UserInteractions   []*UserInteraction   `json:"UserInteractions"`
+	UserLearningGroups []*LearningGroup     `json:"UserLearningGroups"`
+	LearningGroupTypes []*LearningGroupType `json:"LearningGroupTypes"`
+	// Add more datasets here
+}
+
+// This is a struct for a learning group (ex. capstone)
+type LearningGroup struct {
+	// The name of the learning group (the channel name minus the learning group type's prefix)
+	//     ex. plg-30 => 30
+	LearningGroupName string `json:"learning_group_name"`
+
+	// The prefix for this learning group type (personal channel name from the config)
+	//     ex. plg
+	LearningGroupPrefix string `json:"learning_group_prefix"`
+
+	// The id of the private channel for this learning group
+	ChannelId string `json:"channel_id"`
+
+	// The slug name of the private channel for this learning group (Channels.Name)
+	ChannelSlugName string `json:"channel_slug_name"`
+
+	// The display name of the private channel for this learning group (Channels.DisplayName)
+	ChannelDisplayName string `json:"channel_display_name"`
+
+	// An array of LearningGroupMember structs for every member of this learning group (channel)
+	Members []LearningGroupMember `json:"members"`
+
+	// Denotes whether or not the current user has left this learning group
+	HasLeftGroup bool `json:"has_left_group"`
+}
+
+// This is a struct for a learning group query row (ex. capstone)
+// **Note: Using pointers as property types allows for null values
+type LearningGroupQueryRow struct {
+	// The name of the learning group (the channel name minus the learning group type's prefix)
+	//     ex. plg-30 => 30
+	LearningGroupName string `json:"learning_group_name"`
+
+	// The prefix for this learning group type (personal channel name from the config)
+	//     ex. plg
+	LearningGroupPrefix string `json:"learning_group_prefix"`
+
+	// The id of the private channel for this learning group
+	ChannelId string `json:"channel_id"`
+
+	// The slug name of the private channel for this learning group (Channels.Name)
+	ChannelSlugName string `json:"channel_slug_name"`
+
+	// The display name of the private channel for this learning group (Channels.DisplayName)
+	ChannelDisplayName string `json:"channel_display_name"`
+
+	// A semicolor (;) delimited string of members of this learning group channel where each
+	// member string consists of the member's id and username separated by a comma (,).
+	Members *string `json:"members"`
+
+	// Denotes whether or not the current user has left this learning group
+	HasLeftGroup bool `json:"has_left_group"`
+}
+
+// A struct for a member of a learning group
+type LearningGroupMember struct {
+	// The id of this member (user)
+	Id string `json:"id"`
+
+	// The username of this member (user)
+	Username string `json:"username"`
+}
+
 type User struct {
 	Id                       string    `json:"id"`
 	CreateAt                 int64     `json:"create_at,omitempty"`
@@ -343,6 +454,12 @@ func (u *UserPatch) ToJson() string {
 }
 
 func (u *UserAuth) ToJson() string {
+	b, _ := json.Marshal(u)
+	return string(b)
+}
+
+// Used to convert a UserAnalytics struct to json
+func (u *UserAnalytics) ToJson() string {
 	b, _ := json.Marshal(u)
 	return string(b)
 }
