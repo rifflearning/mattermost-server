@@ -2733,6 +2733,7 @@ type Config struct {
 	SupportSettings           SupportSettings
 	AnnouncementSettings      AnnouncementSettings
 	ThemeSettings             ThemeSettings
+	LTISettings               LTISettings
 	GitLabSettings            SSOSettings
 	GoogleSettings            SSOSettings
 	Office365Settings         Office365Settings
