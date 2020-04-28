@@ -109,7 +109,7 @@ func GetLMSChannelSlug(personalChannelName, channelId string) string {
 }
 
 func truncateLMSChannelSlug(channelSlug string) string {
-	end := CHANNEL_NAME_UI_MAX_LENGTH
+	end := CHANNEL_NAME_MAX_LENGTH
 	if len(channelSlug) < end {
 		end = len(channelSlug)
 	}
