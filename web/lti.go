@@ -63,7 +63,7 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if err := setLTIDataCookie(c, w, launchData); err != nil {
+		if err = setLTIDataCookie(c, w, launchData); err != nil {
 			c.Err = err
 			return
 		}
@@ -90,7 +90,7 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			if err := c.App.OnboardLTIUser(user.Id, lms, launchData); err != nil {
+			if err = c.App.OnboardLTIUser(user.Id, lms, launchData); err != nil {
 				c.Err = model.NewAppError("LoginLTIUser", "web.lti.login.onboard_user.app_error", nil, "", err.StatusCode)
 				return
 			}
