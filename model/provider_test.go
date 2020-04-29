@@ -1,3 +1,6 @@
+// Copyright (c) 2019-present Riff Analytics All Rights Reserved.
+// See LICENSE.txt for license information.
+
 package model
 
 import (
