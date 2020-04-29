@@ -88,11 +88,7 @@ func (a *App) SyncLTIChannels(lms model.LMS, launchData map[string]string) *mode
 }
 
 func (a *App) GetUserByLTI(ltiUserID string) (*model.User, *model.AppError) {
-	if result := <-a.Srv.Store.User().GetByLTI(ltiUserID); result.Err != nil {
-		return nil, result.Err
-	} else {
-		return result.Data.(*model.User), nil
-	}
+	return a.Srv().Store.User().GetByLTI(ltiUserID)
 }
 
 // GetLTIUser can be used to get an LTI user by lti user id or email
@@ -140,7 +136,7 @@ func (a *App) joinChannelsIfRequired(userId string, channels model.ChannelList) 
 		if err != nil {
 			// channel member doesn't exist
 			// add user to channel
-			if _, err := a.AddChannelMember(userId, channel, "", "", false); err != nil {
+			if _, err := a.AddChannelMember(userId, channel, "", ""); err != nil {
 				mlog.Error(fmt.Sprintf("User with ID %s could not be added to chanel with ID %s. Error: %s", userId, channel.Id, err.Error()))
 				continue
 			}

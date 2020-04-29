@@ -59,7 +59,6 @@ type Provider struct {
 	Method      string
 	values      url.Values
 	key         []byte
-	r           *http.Request
 }
 
 // NewProvider is a provider configured with sensible defaults

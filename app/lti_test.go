@@ -11,7 +11,7 @@ import (
 )
 
 func TestApp_OnboardLMSUser(t *testing.T) {
-	th := Setup().InitBasic()
+	th := Setup(t).InitBasic()
 	defer th.TearDown()
 
 	user := th.BasicUser
@@ -64,7 +64,7 @@ func TestApp_OnboardLMSUser(t *testing.T) {
 }
 
 func TestApp_PatchLTIUser(t *testing.T) {
-	th := Setup().InitBasic()
+	th := Setup(t).InitBasic()
 	defer th.TearDown()
 
 	user := th.BasicUser
@@ -87,7 +87,7 @@ func TestApp_PatchLTIUser(t *testing.T) {
 }
 
 func TestApp_SyncLTIUser(t *testing.T) {
-	th := Setup().InitBasic()
+	th := Setup(t).InitBasic()
 	defer th.TearDown()
 
 	lms := &model.EdxLMS{
@@ -134,7 +134,7 @@ func TestApp_SyncLTIUser(t *testing.T) {
 }
 
 func TestApp_SyncLTIChannels(t *testing.T) {
-	th := Setup().InitBasic()
+	th := Setup(t).InitBasic()
 	defer th.TearDown()
 
 	lms := &model.EdxLMS{
