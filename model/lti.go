@@ -79,7 +79,7 @@ func baseValidateLTIRequest(consumerSecret, consumerKey, url string, request *ht
 	p := NewProvider(consumerSecret, url)
 	p.ConsumerKey = consumerKey
 
-	if ok, err := p.IsValid(request); err != nil || ok == false {
+	if ok, err := p.IsValid(request); err != nil || !ok {
 		mlog.Error("Invalid LTI request: " + err.Error())
 		return false
 	}

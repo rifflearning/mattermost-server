@@ -79,10 +79,7 @@ func NewProvider(secret, urlSrv string) *Provider {
 func (p *Provider) HasRole(role string) bool {
 	ro := strings.Split(p.Get("roles"), ",")
 	roles := strings.Join(ro, " ") + " "
-	if strings.Contains(roles, role+" ") {
-		return true
-	}
-	return false
+	return strings.Contains(roles, role+" ")
 }
 
 // Get a value from the Params map in provider
@@ -248,7 +245,7 @@ func GetOAuthBaseString(method, requestUrl string, allParameters []KV) (string, 
 
 	OauthKvSort(allParameters)
 
-	strs := make([]string, len(allParameters), len(allParameters))
+	strs := make([]string, len(allParameters))
 	for i, kv := range allParameters {
 		strs[i] = kv.Key + "=" + kv.Val
 	}

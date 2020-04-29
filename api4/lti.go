@@ -41,7 +41,7 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	}
 
 	ltiLaunchData := map[string]string{}
-	if err := json.Unmarshal(data, &ltiLaunchData); err != nil {
+	if err = json.Unmarshal(data, &ltiLaunchData); err != nil {
 		mlog.Error("Error occurred while unmarshaling LTI launch data: " + err.Error())
 		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.unmarshaling.app_error", nil, err.Error(), http.StatusBadRequest)
 		return
