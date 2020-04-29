@@ -111,7 +111,7 @@ type Routes struct {
 
 	ReactionByNameForPostForUser *mux.Router // 'api/v4/users/{user_id:[A-Za-z0-9]+}/posts/{post_id:[A-Za-z0-9]+}/reactions/{emoji_name:[A-Za-z0-9_-+]+}'
 
-	LTI            *mux.Router // 'api/v4/lti'
+	LTI *mux.Router // 'api/v4/lti'
 
 	TermsOfService *mux.Router // 'api/v4/terms_of_service
 	Groups         *mux.Router // 'api/v4/groups'

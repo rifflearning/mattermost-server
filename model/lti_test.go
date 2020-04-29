@@ -38,9 +38,9 @@ func TestGetKnownLMSs(t *testing.T) {
 	})
 
 	ltiSettings := &LTISettings{
-		Enable: true,
+		Enable:                    true,
 		EnableSignatureValidation: true,
-		LMSs: lmss,
+		LMSs:                      lmss,
 	}
 
 	knownLMSs := ltiSettings.GetKnownLMSs()
