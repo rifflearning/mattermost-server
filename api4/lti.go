@@ -4,7 +4,6 @@
 package api4
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -33,7 +32,7 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := base64.StdEncoding.DecodeString(cookie.Value)
+	data, err := url.QueryUnescape(cookie.Value)
 	if err != nil {
 		mlog.Error("Error occurred while decoding LTI launch data: " + err.Error())
 		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.decoding.app_error", nil, "", http.StatusBadRequest)
@@ -41,7 +40,7 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	}
 
 	ltiLaunchData := map[string]string{}
-	if err = json.Unmarshal(data, &ltiLaunchData); err != nil {
+	if err = json.Unmarshal([]byte(data), &ltiLaunchData); err != nil {
 		mlog.Error("Error occurred while unmarshaling LTI launch data: " + err.Error())
 		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.unmarshaling.app_error", nil, err.Error(), http.StatusBadRequest)
 		return

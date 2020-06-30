@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -165,7 +166,7 @@ func encodeLTIRequest(launchData map[string]string) (string, *model.AppError) {
 		return "", model.NewAppError("encodeLTIRequest", "web.lti.login.marshalling.app_error", nil, "", http.StatusBadRequest)
 	}
 
-	return base64.StdEncoding.EncodeToString([]byte(string(res))), nil
+	return string(res), nil
 }
 
 func setLTIDataCookie(c *Context, w http.ResponseWriter, launchData map[string]string) *model.AppError {
@@ -179,7 +180,7 @@ func setLTIDataCookie(c *Context, w http.ResponseWriter, launchData map[string]s
 	expiresAt := time.Unix(model.GetMillis()/1000+int64(maxAge), 0)
 	cookie := &http.Cookie{
 		Name:     model.LTI_LAUNCH_DATA_COOKIE,
-		Value:    encodedRequest,
+		Value:    url.QueryEscape(encodedRequest),
 		Path:     "/",
 		MaxAge:   maxAge,
 		Expires:  expiresAt,
