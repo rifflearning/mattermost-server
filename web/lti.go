@@ -121,6 +121,7 @@ func FinishLTILogin(c *Context, w http.ResponseWriter, r *http.Request, user *mo
 		return model.NewAppError("FinishLTILogin", "web.lti.login.login_user.app_error", nil, "", err.StatusCode)
 	}
 
+	c.App.AttachSessionCookies(w, r)
 	return nil
 }
 
