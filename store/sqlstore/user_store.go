@@ -930,7 +930,7 @@ func (us SqlUserStore) GetByEmail(email string) (*model.User, *model.AppError) {
 }
 
 func (us SqlUserStore) GetByLTI(ltiUserID string) (*model.User, *model.AppError) {
-	ltiProp = fmt.Sprintf("%%\"%s\":\"%s\"%%", model.LTI_USER_ID_PROP_KEY, ltiUserID)
+	ltiProp := fmt.Sprintf("%%\"%s\":\"%s\"%%", model.LTI_USER_ID_PROP_KEY, ltiUserID)
 
 	query := us.usersQuery.Where("Props LIKE ?", ltiProp)
 

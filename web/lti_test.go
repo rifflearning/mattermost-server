@@ -13,7 +13,7 @@ import (
 )
 
 func TestLoginWithLTI(t *testing.T) {
-	th := Setup().InitBasic()
+	th := Setup(t).InitBasic()
 	defer th.TearDown()
 
 	if !th.App.Config().LTISettings.Enable {

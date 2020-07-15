@@ -43,7 +43,7 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if c.App.Config().LTISettings.EnableSignatureValidation && !lms.ValidateLTIRequest(c.GetSiteURLHeader()+c.Path, r) {
+	if c.App.Config().LTISettings.EnableSignatureValidation && !lms.ValidateLTIRequest(c.GetSiteURLHeader()+c.App.Path(), r) {
 		c.Err = model.NewAppError("loginWithLTI", "web.lti.login.validation.app_error", nil, "", http.StatusBadRequest)
 		return
 	}
@@ -115,12 +115,12 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 }
 
 func FinishLTILogin(c *Context, w http.ResponseWriter, r *http.Request, user *model.User, lms model.LMS, launchData map[string]string) *model.AppError {
-	session, err := c.App.DoLogin(w, r, user, "")
+	err := c.App.DoLogin(w, r, user, "")
 	if err != nil {
 		return model.NewAppError("FinishLTILogin", "web.lti.login.login_user.app_error", nil, "", err.StatusCode)
 	}
 
-	c.Session = *session
+	c.App.AttachSessionCookies(w, r)
 	return nil
 }
 
@@ -154,7 +154,7 @@ func getLTILaunchData(c *Context, r *http.Request) (map[string]string, *model.Ap
 	}
 
 	// printing launch data for debugging purposes
-	mlog.Debug("LTI Launch Data", mlog.String("URL", c.GetSiteURLHeader()+c.Path), mlog.Any("Body", launchData))
+	mlog.Debug("LTI Launch Data", mlog.String("URL", c.GetSiteURLHeader()+c.App.Path()), mlog.Any("Body", launchData))
 	return launchData, nil
 }
 
