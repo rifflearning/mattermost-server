@@ -1,6 +1,6 @@
 {
     "ServiceSettings": {
-        "SiteURL": "",
+        "SiteURL": "http://localhost",
         "WebsocketURL": "",
         "LicenseFileLocation": "",
         "ListenAddress": ":8065",
@@ -30,7 +30,7 @@
         "EnablePostIconOverride": false,
         "EnableLinkPreviews": true,
         "EnableTesting": false,
-        "EnableDeveloper": false,
+        "EnableDeveloper": true,
         "EnableOpenTracing": false,
         "EnableSecurityFixAlert": true,
         "EnableInsecureOutgoingConnections": false,
@@ -92,7 +92,7 @@
         "LocalModeSocketLocation": "/var/tmp/mattermost_local.socket"
     },
     "TeamSettings": {
-        "SiteName": "Mattermost",
+        "SiteName": "Riff Edu",
         "MaxUsersPerTeam": 50,
         "EnableTeamCreation": true,
         "EnableUserCreation": true,
@@ -100,8 +100,8 @@
         "EnableUserDeactivation": false,
         "RestrictCreationToDomains": "",
         "EnableCustomBrand": false,
-        "CustomBrandText": "",
-        "CustomDescriptionText": "",
+        "CustomBrandText": "Your course collaboration platform.\nConnected teams have better outcomes.",
+        "CustomDescriptionText": "Your course collaboration platform. Connected teams have better outcomes.",
         "RestrictDirectMessage": "any",
         "RestrictTeamInvite": "all",
         "RestrictPublicChannelManagement": "all",
@@ -135,14 +135,14 @@
     },
     "SqlSettings": {
         "DriverName": "mysql",
-        "DataSource": "mmuser:mostest@tcp(localhost:3306)/mattermost_test?charset=utf8mb4,utf8\u0026readTimeout=30s\u0026writeTimeout=30s",
+        "DataSource": "mmuser:mostest@tcp(edu-mm-db:3306)/mattermost_test?charset=utf8mb4,utf8\u0026readTimeout=30s\u0026writeTimeout=30s",
         "DataSourceReplicas": [],
         "DataSourceSearchReplicas": [],
         "MaxIdleConns": 20,
         "ConnMaxLifetimeMilliseconds": 3600000,
         "MaxOpenConns": 300,
         "Trace": false,
-        "AtRestEncryptKey": "zenqj3oxgycihmhf343ppe3gpbi6sn87",
+        "AtRestEncryptKey": "g1jc6jjjc9hogne4q71mwjkdrwpg69cn",
         "QueryTimeout": 30,
         "DisableDatabaseSearch": false
     },
@@ -183,11 +183,11 @@
         "FileLocation": ""
     },
     "PasswordSettings": {
-        "MinimumLength": 10,
-        "Lowercase": true,
-        "Number": true,
-        "Uppercase": true,
-        "Symbol": true
+        "MinimumLength": 5,
+        "Lowercase": false,
+        "Number": false,
+        "Uppercase": false,
+        "Symbol": false
     },
     "FileSettings": {
         "EnableFileAttachments": true,
@@ -197,7 +197,7 @@
         "DriverName": "local",
         "Directory": "./data/",
         "EnablePublicLink": false,
-        "PublicLinkSalt": "c5t59kueiw4wfrmmi5btpbnd3g1k91ng",
+        "PublicLinkSalt": "jeu7tp1qot1dyu81utwtjdex3bea9374",
         "InitialFont": "nunito-bold.ttf",
         "AmazonS3AccessKeyId": "",
         "AmazonS3SecretAccessKey": "",
@@ -227,8 +227,8 @@
         "SMTPPort": "10025",
         "SMTPServerTimeout": 10,
         "ConnectionSecurity": "",
-        "SendPushNotifications": true,
-        "PushNotificationServer": "https://push-test.mattermost.com",
+        "SendPushNotifications": false,
+        "PushNotificationServer": "",
         "PushNotificationContents": "full",
         "EnableEmailBatching": false,
         "EmailBatchingBufferSize": 256,
@@ -383,6 +383,79 @@
         "LoginButtonColor": "#34a28b",
         "LoginButtonBorderColor": "#2389D7",
         "LoginButtonTextColor": "#ffffff"
+    },
+    "LTISettings": {
+        "Enable": true,
+        "EnableSignatureValidation": false,
+        "LMSs": [
+            {
+                "Name": "Appsembler",
+                "Type": "edx",
+                "OAuthConsumerKey": "edx-appsembler-test_5345",
+                "OAuthConsumerSecret": "secret",
+                "Teams": {
+                    "course-v1:appsembler-the-red+Riff+101": "riff"
+                },
+                "PersonalChannels": {
+                    "Type": "custom-properties",
+                    "ChannelList": {
+                        "plg": {
+                            "NameProperty": "custom_cohort_name",
+                            "IdProperty": "custom_cohort_id"
+                        },
+                        "capstone": {
+                            "NameProperty": "custom_team_name",
+                            "IdProperty": "custom_team_id"
+                        }
+                    }
+                }
+            },
+            {
+                "Name": "BrightScout",
+                "Type": "edx",
+                "OAuthConsumerKey": "brightscout-test_1044",
+                "OAuthConsumerSecret": "secret",
+                "Teams": {
+                    "course-v1:appsembler-the-red+Riff+101": "riff",
+                    "test-context-1": "riff-a",
+                    "test-context-2": "riff-b"
+                },
+                "PersonalChannels": {
+                    "Type": "custom-properties",
+                    "ChannelList": {
+                        "plg": {
+                            "NameProperty": "custom_cohort_name",
+                            "IdProperty": "custom_cohort_id"
+                        },
+                        "capstone": {
+                            "NameProperty": "custom_team_name",
+                            "IdProperty": "custom_team_id"
+                        }
+                    }
+                }
+            },
+            {
+                "Name": "Emeritus",
+                "Type": "canvas",
+                "OAuthConsumerKey": "canvas-emeritus_5863",
+                "OAuthConsumerSecret": "emeritus secret",
+                "Teams": {
+                    "eabb2ed57cf5dec85996803535cbccb4c7f62492": "sloan-1"
+                },
+                "PersonalChannels": {
+                    "Type": "emeritus-groups",
+                    "AuthorizationToken": "dummy~value",
+                    "ChannelList": {
+                        "plg": {
+                            "NameRegEx": "^riff_PLG_"
+                        },
+                        "capstone": {
+                            "NameRegEx": "^riff_Team_"
+                        }
+                    }
+                }
+            }
+        ]
     },
     "NativeAppSettings": {
         "AppDownloadLink": "https://mattermost.com/download/#mattermostApps",
