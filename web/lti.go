@@ -16,7 +16,7 @@ import (
 )
 
 func (w *Web) InitLti() {
-	w.MainRouter.Handle("/login/lti", w.NewHandler(loginWithLTI)).Methods("POST")
+	w.MainRouter.Handle("/login/lti", w.ApiHandlerTrustRequester(loginWithLTI)).Methods("POST")
 }
 
 func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
