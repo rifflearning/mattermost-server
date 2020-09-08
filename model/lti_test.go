@@ -52,9 +52,9 @@ func TestGetKnownLMSs(t *testing.T) {
 
 func TestGetLMSChannelSlug(t *testing.T) {
 	personalChannelName := "plg"
-	channelId := "really_long_personal_channel_id"
+	channelId := "really_long_personal_channel_id_34567890123456789012345678901234567890"
 	channelSlug := GetLMSChannelSlug(personalChannelName, channelId)
-	assert.Equal(t, "plg-really_long_person", channelSlug)
+	assert.Equal(t, "plg-really_long_personal_channel_id_3456789012345678901234567890", channelSlug)
 }
 
 func Test_baseValidateLTIRequest(t *testing.T) {
