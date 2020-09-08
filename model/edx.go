@@ -9,14 +9,23 @@ import (
 )
 
 const (
-	launchDataEmailKey           = "lis_person_contact_email_primary"
-	launchDataUsernameKey        = "lis_person_sourcedid"
-	launchDataFirstNameKey       = "lis_person_name_given"
-	launchDataLastNameKey        = "lis_person_name_family"
-	launchDataPositionKey        = "roles"
+	launchDataEmailKey     = "lis_person_contact_email_primary"
+	launchDataUsernameKey  = "lis_person_sourcedid"
+	launchDataFirstNameKey = "lis_person_name_given"
+	launchDataLastNameKey  = "lis_person_name_family"
+	launchDataFullNameKey  = "lis_person_name_full"
+	launchDataPositionKey  = "roles"
+
+	// The LTI user id is used to link the MM user to the LTI user. It should be
+	// a unique edX platform wide Id. The value sent by edX in the "user_id" field
+	// is only unique to the course so it cannot be used for this purpose.
+	// The Appsembler customized edX platform sends this custom user id, other
+	// edX platforms may not.
+	// The fallback is for the LTI user id to be composed of the LMS consumer key
+	// and the user's email address. This means that a change of email address on
+	// the edX platform will be treated as a new user.
 	launchDataLTIUserIdKey       = "custom_user_id"
 	launchDataChannelRedirectKey = "custom_channel_redirect"
-	launchDataFullNameKey        = "lis_person_name_full"
 
 	redirectChannelLookupKeyword = "lookup"
 )
@@ -88,8 +97,20 @@ func (e *EdxLMS) GetPersonalChannelNames() []string {
 	return channelNames
 }
 
+// The LTI user id is used to link the LTI user to a MM user.
+//
+// If the field w/ a platform wide unique user id is not supplied we will
+// fallback to constructing an id by combining the LMS's consumer key with the
+// user's email address. This is not ideal as if the user changes their email
+// address on the edX site, they will be considered a new user on this MM site.
 func (e *EdxLMS) GetUserId(launchData map[string]string) string {
-	return launchData[launchDataLTIUserIdKey]
+	ltiUserId, ok := launchData[launchDataLTIUserIdKey]
+
+	if !ok {
+		ltiUserId = e.OAuthConsumerKey + ":" + launchData[launchDataEmailKey]
+	}
+
+	return ltiUserId
 }
 
 func (e *EdxLMS) ValidateLTIRequest(url string, request *http.Request) bool {
