@@ -4,7 +4,6 @@
 package app
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/mattermost/mattermost-server/v5/mlog"
@@ -137,7 +136,7 @@ func (a *App) joinChannelsIfRequired(userId string, channels model.ChannelList) 
 			// channel member doesn't exist
 			// add user to channel
 			if _, err := a.AddChannelMember(userId, channel, "", ""); err != nil {
-				mlog.Error(fmt.Sprintf("User with ID %s could not be added to channel with ID %s. Error: %s", userId, channel.Id, err.Error()))
+				mlog.Error("User could not be added to channel: "+err.Error(), mlog.String("UserId", userId), mlog.String("ChannelId", channel.Id))
 				continue
 			}
 		}
@@ -147,14 +146,14 @@ func (a *App) joinChannelsIfRequired(userId string, channels model.ChannelList) 
 func (a *App) addTeamMemberIfRequired(userId string, teamName string) *model.AppError {
 	team, err := a.GetTeamByName(teamName)
 	if err != nil {
-		mlog.Error(fmt.Sprintf("Team to be used: %s could not be found: %s", teamName, err.Error()))
+		mlog.Error("Team to be used could not be found: "+err.Error(), mlog.String("TeamName", teamName))
 		return model.NewAppError("OnboardLTIUser", "app.onboard_lms_user.team_not_found.app_error", nil, "", http.StatusInternalServerError)
 	}
 
 	if _, err := a.GetTeamMember(team.Id, userId); err != nil {
 		// user is not a member of team. Adding team member
 		if _, err := a.AddTeamMember(team.Id, userId); err != nil {
-			mlog.Error(fmt.Sprintf("Error occurred while adding user %s to team %s: %s", userId, team.Id, err.Error()))
+			mlog.Error("Error occurred while adding user to team: "+err.Error(), mlog.String("UserId", userId), mlog.String("TeamId", team.Id))
 		}
 	}
 

@@ -1,6 +1,6 @@
 {
     "ServiceSettings": {
-        "SiteURL": "http://localhost",
+        "SiteURL": "https://localhost",
         "WebsocketURL": "",
         "LicenseFileLocation": "",
         "ListenAddress": ":8065",
@@ -550,7 +550,7 @@
     },
     "PluginSettings": {
         "Enable": true,
-        "EnableUploads": false,
+        "EnableUploads": true,
         "AllowInsecureDownloadUrl": false,
         "EnableHealthCheck": true,
         "Directory": "./plugins",
@@ -561,7 +561,7 @@
                 "Enable": true
             }
         },
-        "EnableMarketplace": true,
+        "EnableMarketplace": false,
         "EnableRemoteMarketplace": true,
         "AutomaticPrepackagedPlugins": true,
         "RequirePluginSignature": false,

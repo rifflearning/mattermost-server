@@ -55,6 +55,15 @@ func TestBuildUser(t *testing.T) {
 	assert.Equal(t, "password", user.Password)
 	assert.Contains(t, user.Props, "lti_user_id")
 	assert.Equal(t, "user_5", user.Props["lti_user_id"])
+
+	// Test BuildUser w/o a custom_user_id field in the launchData
+	// should compose an lti_user_id w/ the consumer key and user's email
+	delete(launchData, "custom_user_id")
+	user, err = lms.BuildUser(launchData, "password")
+	assert.Nil(t, err)
+
+	assert.Contains(t, user.Props, "lti_user_id")
+	assert.Equal(t, "consumer_key:foo@example.com", user.Props["lti_user_id"])
 }
 
 func TestGetPrivateChannelsToJoin(t *testing.T) {
