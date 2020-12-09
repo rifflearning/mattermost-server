@@ -1809,8 +1809,8 @@ func testUserStoreGetByLTI(t *testing.T, ss store.Store) {
 	})
 	require.Nil(t, err)
 	defer func() { require.Nil(t, ss.User().PermanentDelete(u1.Id)) }()
-	_, err = ss.Team().SaveMember(&model.TeamMember{TeamId: teamId, UserId: u1.Id}, -1)
-	require.Nil(t, err)
+	_, nErr := ss.Team().SaveMember(&model.TeamMember{TeamId: teamId, UserId: u1.Id}, -1)
+	require.Nil(t, nErr)
 
 	t.Run("get u1 by lti id", func(t *testing.T) {
 		u, err := ss.User().GetByLTI(u1.Props[model.LTI_USER_ID_PROP_KEY])
