@@ -70,6 +70,7 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user.EmailVerified = true
 	user, appErr = c.App.CreateUser(user)
 	if appErr != nil {
 		mlog.Error("Error occurred while creating LTI user: " + appErr.Error())
