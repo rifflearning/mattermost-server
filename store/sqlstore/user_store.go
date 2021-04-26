@@ -1060,7 +1060,7 @@ func (us SqlUserStore) GetByLTI(ltiUserID string) (*model.User, *model.AppError)
 
 	user := model.User{}
 	if err := us.GetReplica().SelectOne(&user, queryString, args...); err != nil {
-		return nil, model.NewAppError("SqlUserStore.GetByLTI", store.MISSING_LTI_ACCOUNT_ERROR, nil, "ltiUserID="+ltiUserID+", "+err.Error(), http.StatusBadRequest)
+		return nil, model.NewAppError("SqlUserStore.GetByLTI", store.MissingLTIAccountError, nil, "ltiUserID="+ltiUserID+", "+err.Error(), http.StatusBadRequest)
 	}
 
 	return &user, nil

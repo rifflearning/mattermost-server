@@ -1895,7 +1895,7 @@ func testUserStoreGetByLTI(t *testing.T, ss store.Store) {
 	t.Run("get by empty lti id", func(t *testing.T) {
 		_, err := ss.User().GetByLTI("")
 		require.NotNil(t, err)
-		require.Equal(t, err.Id, store.MISSING_LTI_ACCOUNT_ERROR)
+		require.Equal(t, err.Id, store.MissingLTIAccountError)
 	})
 }
 
