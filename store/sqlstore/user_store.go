@@ -1048,19 +1048,19 @@ func (us SqlUserStore) GetByEmail(email string) (*model.User, error) {
 	return &user, nil
 }
 
-func (us SqlUserStore) GetByLTI(ltiUserID string) (*model.User, *model.AppError) {
+func (us SqlUserStore) GetByLTI(ltiUserID string) (*model.User, error) {
 	ltiProp := fmt.Sprintf("%%\"%s\":\"%s\"%%", model.LTI_USER_ID_PROP_KEY, ltiUserID)
 
 	query := us.usersQuery.Where("Props LIKE ?", ltiProp)
 
 	queryString, args, err := query.ToSql()
 	if err != nil {
-		return nil, model.NewAppError("SqlUserStore.GetByLTI", "store.sql_user.app_error", nil, err.Error(), http.StatusInternalServerError)
+		return nil, errors.Wrap(err, "get_by_lti_tosql")
 	}
 
 	user := model.User{}
 	if err := us.GetReplica().SelectOne(&user, queryString, args...); err != nil {
-		return nil, model.NewAppError("SqlUserStore.GetByLTI", store.MissingLTIAccountError, nil, "ltiUserID="+ltiUserID+", "+err.Error(), http.StatusBadRequest)
+		return nil, errors.Wrap(store.NewErrNotFound("User", fmt.Sprintf("lti_id=%s", ltiUserID)), "failed to find User")
 	}
 
 	return &user, nil

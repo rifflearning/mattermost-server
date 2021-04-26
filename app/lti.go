@@ -86,7 +86,7 @@ func (a *App) SyncLTIChannels(lms model.LMS, launchData map[string]string) *mode
 	return nil
 }
 
-func (a *App) GetUserByLTI(ltiUserID string) (*model.User, *model.AppError) {
+func (a *App) GetUserByLTI(ltiUserID string) (*model.User, error) {
 	return a.Srv().Store.User().GetByLTI(ltiUserID)
 }
 

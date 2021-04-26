@@ -1881,21 +1881,20 @@ func testUserStoreGetByLTI(t *testing.T, ss store.Store) {
 			model.LTI_USER_ID_PROP_KEY: model.NewId(),
 		},
 	})
-	require.Nil(t, err)
-	defer func() { require.Nil(t, ss.User().PermanentDelete(u1.Id)) }()
-	_, err = ss.Team().SaveMember(&model.TeamMember{TeamId: teamId, UserId: u1.Id}, -1)
-	require.Nil(t, err)
+	require.NoError(t, err)
+	defer func() { require.NoError(t, ss.User().PermanentDelete(u1.Id)) }()
+	_, nErr := ss.Team().SaveMember(&model.TeamMember{TeamId: teamId, UserId: u1.Id}, -1)
+	require.NoError(t, nErr)
 
 	t.Run("get u1 by lti id", func(t *testing.T) {
 		u, err := ss.User().GetByLTI(u1.Props[model.LTI_USER_ID_PROP_KEY])
-		require.Nil(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, u1, u)
 	})
 
 	t.Run("get by empty lti id", func(t *testing.T) {
 		_, err := ss.User().GetByLTI("")
-		require.NotNil(t, err)
-		require.Equal(t, err.Id, store.MissingLTIAccountError)
+		require.Error(t, err)
 	})
 }
 
