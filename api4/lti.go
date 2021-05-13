@@ -20,7 +20,14 @@ func (api *API) InitLTI() {
 }
 
 func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
-	if !c.App.Config().LTISettings.Enable {
+	LTISettings, err := c.App.GetLTISettings()
+	if err != nil {
+		mlog.Error(err.Error())
+		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.get_lti_config.app_error", nil, "", http.StatusNotImplemented)
+		return
+	}
+
+	if !LTISettings.Enable {
 		mlog.Error("LTI signup request when LTI is disabled")
 		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.disabled.app_error", nil, "", http.StatusNotImplemented)
 		return
@@ -55,7 +62,7 @@ func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if c.App.Config().LTISettings.EnableSignatureValidation && !lms.ValidateLTIRequest(c.GetSiteURLHeader()+"/login/lti", addLaunchDataToForm(ltiLaunchData, r)) {
+	if LTISettings.EnableSignatureValidation && !lms.ValidateLTIRequest(c.GetSiteURLHeader()+"/login/lti", addLaunchDataToForm(ltiLaunchData, r)) {
 		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.validation.app_error", nil, "", http.StatusBadRequest)
 		return
 	}

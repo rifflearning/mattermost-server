@@ -604,6 +604,7 @@ type AppIface interface {
 	GetJobsByTypePage(jobType string, page int, perPage int) ([]*model.Job, *model.AppError)
 	GetJobsPage(page int, perPage int) ([]*model.Job, *model.AppError)
 	GetLMSToUse(consumerKey string) model.LMS
+	GetLTISettings() (*model.LTISettings, error)
 	GetLatestTermsOfService() (*model.TermsOfService, *model.AppError)
 	GetLogs(page, perPage int) ([]string, *model.AppError)
 	GetLogsSkipSend(page, perPage int) ([]string, *model.AppError)
