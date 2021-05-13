@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/mattermost/mattermost-server/v5/model"
@@ -21,9 +20,14 @@ func (w *Web) InitLti() {
 
 func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	mlog.Debug("Received an LTI Login request")
+	LTISettings, ltiErr := c.App.GetLTISettings()
+	if ltiErr != nil {
+		mlog.Error(ltiErr.Error())
+		c.Err = model.NewAppError("signupWithLTI", "web.lti.login.get_lti_config.app_error", nil, "", http.StatusNotImplemented)
+		return
+	}
 
-	mlog.Debug("Testing whether LTI is enabled: " + strconv.FormatBool(c.App.Config().LTISettings.Enable))
-	if !c.App.Config().LTISettings.Enable {
+	if !LTISettings.Enable {
 		mlog.Error("LTI login request when LTI is disabled in config.json")
 		c.Err = model.NewAppError("loginWithLTI", "web.lti.login.disabled.app_error", nil, "", http.StatusNotImplemented)
 		return
@@ -35,7 +39,7 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mlog.Debug("Validate LTI request. LTI Signature Validation enabled: " + strconv.FormatBool(c.App.Config().LTISettings.EnableSignatureValidation))
+	mlog.Debug("Validating LTI request if LTI Signature Validation is enabled", mlog.Bool("EnableSignatureValidation", LTISettings.EnableSignatureValidation))
 	consumerKey := r.FormValue("oauth_consumer_key")
 	lms := c.App.GetLMSToUse(consumerKey)
 	if lms == nil {
@@ -43,7 +47,7 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if c.App.Config().LTISettings.EnableSignatureValidation && !lms.ValidateLTIRequest(c.GetSiteURLHeader()+c.App.Path(), r) {
+	if LTISettings.EnableSignatureValidation && !lms.ValidateLTIRequest(c.GetSiteURLHeader()+c.App.Path(), r) {
 		c.Err = model.NewAppError("loginWithLTI", "web.lti.login.validation.app_error", nil, "", http.StatusBadRequest)
 		return
 	}

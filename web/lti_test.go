@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/mattermost/mattermost-server/v5/model"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -16,7 +18,24 @@ func TestLoginWithLTI(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
 
-	if !th.App.Config().LTISettings.Enable {
+	pluginJson := map[string]interface{}{
+		"enable":                    false,
+		"enablesignaturevalidation": true,
+		"lmss":                      nil,
+	}
+
+	// Add the LTI plugin settings in the testing config.
+	th.App.UpdateConfig(func(cfg *model.Config) {
+		cfg.PluginSettings.Plugins[model.LTI_PLUGIN_ID] = pluginJson
+	})
+
+	LTISettings, ltiErr := th.App.GetLTISettings()
+	if ltiErr != nil {
+		require.Nil(t, ltiErr)
+		return
+	}
+
+	if !LTISettings.Enable {
 		resp, err := http.Post(ApiClient.Url+"/login/lti", "", strings.NewReader("123"))
 		require.Nil(t, err)
 		assert.True(t, resp.StatusCode != http.StatusOK, "should have errored - lti turned off")

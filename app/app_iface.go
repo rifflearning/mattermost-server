@@ -34,6 +34,10 @@ import (
 
 // AppIface is extracted from App struct and contains all it's exported methods. It's provided to allow partial interface passing and app layers creation.
 type AppIface interface {
+	//
+	//	GetLTISettings() reads the LTI Config from Plugin Config
+	//
+	GetLTISettings() (*model.LTISettings, error)
 	// @openTracingParams args
 	ExecuteCommand(args *model.CommandArgs) (*model.CommandResponse, *model.AppError)
 	// @openTracingParams teamID

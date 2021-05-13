@@ -1713,6 +1713,14 @@
     "translation": "LTI-25: LTI Launch Data is missing UserID."
   },
   {
+    "id": "api.lti.signup.get_lti_config.app_error",
+    "translation": "LTI-26: Unable to retrieve LTI Settings from Config."
+  },
+  {
+    "id": "web.lti.login.get_lti_config.app_error",
+    "translation": "LTI-27: Unable to retrieve LTI Settings from Config."
+  },
+  {
     "id": "api.marshal_error",
     "translation": "marshal error"
   },
