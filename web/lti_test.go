@@ -16,6 +16,13 @@ func TestLoginWithLTI(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
 
+	LTISettings, ltiErr := th.App.GetLTISettings();
+	if(ltiErr != nil){
+		require.Nil(t, ltiErr)
+		return
+	}
+
+	// TODO: Fix test failing here because now we are getting LTISettings from plugin config.
 	if !th.App.Config().LTISettings.Enable {
 		resp, err := http.Post(ApiClient.Url+"/login/lti", "", strings.NewReader("123"))
 		require.Nil(t, err)

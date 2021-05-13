@@ -22,6 +22,8 @@ const (
 	LTI_NAME_COOKIE = "MMLTINAME"
 
 	LTI_USER_ID_PROP_KEY = "lti_user_id"
+
+	LTI_PLUGIN_ID = "com.rifflearning.lti"
 )
 
 type LMSOAuthSettings struct {
@@ -48,9 +50,9 @@ type LMS interface {
 }
 
 type LTISettings struct {
-	Enable                    bool
-	EnableSignatureValidation bool
-	LMSs                      []interface{}
+	Enable                    bool          `json:"enable"`
+	EnableSignatureValidation bool          `json:"enablesignaturevalidation"`
+	LMSs                      []interface{} `json:"lmss"`
 }
 
 // GetKnownLMSs can be used to extract a slice of known LMSs from LTI settings

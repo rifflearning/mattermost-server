@@ -5,13 +5,40 @@ package app
 
 import (
 	"net/http"
+	"encoding/json"
+	"fmt"
 
 	"github.com/mattermost/mattermost-server/v5/model"
 	"github.com/mattermost/mattermost-server/v5/shared/mlog"
 )
 
+func (a* App) GetLTISettings() (*model.LTISettings, error) {
+	var LTIConfig map[string]interface{}
+	LTIConfig, ok := a.Config().PluginSettings.Plugins[model.LTI_PLUGIN_ID]
+	if !ok {
+		return nil, fmt.Errorf("LTI Configuration Plugin not found")
+	}
+
+	configJson, err := json.Marshal(LTIConfig)
+	if err != nil {
+		return nil, fmt.Errorf("Error marshaling LTI Config: %s",err.Error())
+	}
+
+	var LTISettings *model.LTISettings
+	if err = json.Unmarshal(configJson, &LTISettings); err != nil {
+		return nil, fmt.Errorf("Error unmarshaling LTI Config from json: %s",err.Error())
+	}
+	return LTISettings, nil;
+}
+
 func (a *App) GetLMSToUse(consumerKey string) model.LMS {
-	for _, lms := range a.Config().LTISettings.GetKnownLMSs() {
+	LTISettings, err := a.GetLTISettings();
+	if(err != nil){
+		mlog.Error(err.Error());
+		return nil
+	}
+
+	for _, lms := range LTISettings.GetKnownLMSs() {
 		if lms.GetOAuthConsumerKey() == consumerKey {
 			return lms
 		}
