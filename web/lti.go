@@ -25,7 +25,7 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	LTISettings, ltiErr := c.App.GetLTISettings();
 	if(ltiErr != nil){
 		mlog.Error(ltiErr.Error());
-		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.marshaling.app_error", nil, "", http.StatusNotImplemented)
+		c.Err = model.NewAppError("signupWithLTI", "web.lti.login.get_lti_config.app_error", nil, "", http.StatusNotImplemented)
 		return
 	}
 	mlog.Debug("Testing whether LTI is enabled: " + strconv.FormatBool(LTISettings.Enable))
