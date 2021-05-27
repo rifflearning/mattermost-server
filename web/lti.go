@@ -21,15 +21,14 @@ func (w *Web) InitLti() {
 
 func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	mlog.Debug("Received an LTI Login request")
-
-	LTISettings, ltiErr := c.App.GetLTISettings();
-	if(ltiErr != nil){
-		mlog.Error(ltiErr.Error());
+	LTISettings, ltiErr := c.App.GetLTISettings()
+	if ltiErr != nil {
+		mlog.Error(ltiErr.Error())
 		c.Err = model.NewAppError("signupWithLTI", "web.lti.login.get_lti_config.app_error", nil, "", http.StatusNotImplemented)
 		return
 	}
 	mlog.Debug("Testing whether LTI is enabled: " + strconv.FormatBool(LTISettings.Enable))
-	
+
 	if !LTISettings.Enable {
 		mlog.Error("LTI login request when LTI is disabled in config.json")
 		c.Err = model.NewAppError("loginWithLTI", "web.lti.login.disabled.app_error", nil, "", http.StatusNotImplemented)

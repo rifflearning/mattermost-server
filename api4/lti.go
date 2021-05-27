@@ -20,9 +20,9 @@ func (api *API) InitLTI() {
 }
 
 func signupWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
-	LTISettings, err := c.App.GetLTISettings();
-	if(err != nil){
-		mlog.Error(err.Error());
+	LTISettings, err := c.App.GetLTISettings()
+	if err != nil {
+		mlog.Error(err.Error())
 		c.Err = model.NewAppError("signupWithLTI", "api.lti.signup.get_lti_config.app_error", nil, "", http.StatusNotImplemented)
 		return
 	}

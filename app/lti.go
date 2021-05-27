@@ -4,15 +4,22 @@
 package app
 
 import (
-	"net/http"
 	"encoding/json"
 	"fmt"
+	"net/http"
+
+	"github.com/pkg/errors"
 
 	"github.com/mattermost/mattermost-server/v5/model"
 	"github.com/mattermost/mattermost-server/v5/shared/mlog"
 )
 
-func (a* App) GetLTISettings() (*model.LTISettings, error) {
+//
+//	GetLTISettings() reads the LTI Config from Plugin Config
+//
+func (a *App) GetLTISettings() (*model.LTISettings, error) {
+
+	//	Check that if a plugin with LTI_PLUGIN_ID is installed in the server.
 	var LTIConfig map[string]interface{}
 	LTIConfig, ok := a.Config().PluginSettings.Plugins[model.LTI_PLUGIN_ID]
 	if !ok {
@@ -21,20 +28,20 @@ func (a* App) GetLTISettings() (*model.LTISettings, error) {
 
 	configJson, err := json.Marshal(LTIConfig)
 	if err != nil {
-		return nil, fmt.Errorf("Error marshaling LTI Config: %s",err.Error())
+		return nil, errors.Wrap(err, "Error marshaling LTI Config: %s")
 	}
 
 	var LTISettings *model.LTISettings
 	if err = json.Unmarshal(configJson, &LTISettings); err != nil {
-		return nil, fmt.Errorf("Error unmarshaling LTI Config from json: %s",err.Error())
+		return nil, errors.Wrap(err, "Error unmarshaling LTI Config from json: %s")
 	}
-	return LTISettings, nil;
+	return LTISettings, nil
 }
 
 func (a *App) GetLMSToUse(consumerKey string) model.LMS {
-	LTISettings, err := a.GetLTISettings();
-	if(err != nil){
-		mlog.Error(err.Error());
+	LTISettings, err := a.GetLTISettings()
+	if err != nil {
+		mlog.Error(err.Error())
 		return nil
 	}
 

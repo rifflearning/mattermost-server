@@ -23,6 +23,7 @@ const (
 
 	LTI_USER_ID_PROP_KEY = "lti_user_id"
 
+	// LTI_PLUGIN_ID is the ID of the plugin used to maintain the LTI settings.
 	LTI_PLUGIN_ID = "com.rifflearning.lti"
 )
 

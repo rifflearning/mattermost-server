@@ -19,17 +19,18 @@ func TestLoginWithLTI(t *testing.T) {
 	defer th.TearDown()
 
 	pluginJson := map[string]interface{}{
-		"enable": false,
+		"enable":                    false,
 		"enablesignaturevalidation": true,
-		"lmss": nil,
+		"lmss":                      nil,
 	}
 
+	// Add the LTI plugin settings in the testing config.
 	th.App.UpdateConfig(func(cfg *model.Config) {
 		cfg.PluginSettings.Plugins[model.LTI_PLUGIN_ID] = pluginJson
 	})
 
-	LTISettings, ltiErr := th.App.GetLTISettings();
-	if(ltiErr != nil){
+	LTISettings, ltiErr := th.App.GetLTISettings()
+	if ltiErr != nil {
 		require.Nil(t, ltiErr)
 		return
 	}
