@@ -27,7 +27,6 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		c.Err = model.NewAppError("signupWithLTI", "web.lti.login.get_lti_config.app_error", nil, "", http.StatusNotImplemented)
 		return
 	}
-	mlog.Debug("Testing whether LTI is enabled: " + strconv.FormatBool(LTISettings.Enable))
 
 	if !LTISettings.Enable {
 		mlog.Error("LTI login request when LTI is disabled in config.json")
@@ -41,7 +40,7 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mlog.Debug("Validate LTI request. LTI Signature Validation enabled: " + strconv.FormatBool(LTISettings.EnableSignatureValidation))
+	mlog.Debug("Validating LTI request if LTI Signature Validation is enabled", mlog.Bool("EnableSignatureValidation", LTISettings.EnableSignatureValidation))
 	consumerKey := r.FormValue("oauth_consumer_key")
 	lms := c.App.GetLMSToUse(consumerKey)
 	if lms == nil {

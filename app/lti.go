@@ -19,11 +19,11 @@ import (
 //
 func (a *App) GetLTISettings() (*model.LTISettings, error) {
 
-	//	Check that if a plugin with LTI_PLUGIN_ID is installed in the server.
+	// Check that the LTISettings configuration exists, it "belongs" to the LTI_PLUGIN_ID plugin.
 	var LTIConfig map[string]interface{}
 	LTIConfig, ok := a.Config().PluginSettings.Plugins[model.LTI_PLUGIN_ID]
 	if !ok {
-		return nil, fmt.Errorf("LTI Configuration Plugin not found")
+		return nil, fmt.Errorf("No LTI Configuration was found at PluginSettings.Plugins.%v", model.LTI_PLUGIN_ID)
 	}
 
 	configJson, err := json.Marshal(LTIConfig)
