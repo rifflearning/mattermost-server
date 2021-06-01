@@ -54,7 +54,6 @@ func loginWithLTI(c *Context, w http.ResponseWriter, r *http.Request) {
 	user := c.App.GetLTIUser(ltiUserID, email)
 	if user == nil {
 		// Case: MM or LTI User not found
-		mlog.Debug("MM or LTI User not found")
 		c.Logout(w, r)
 
 		// Don't redirect to signup page if BuildUser is going to fail

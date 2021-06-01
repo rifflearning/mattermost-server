@@ -8909,7 +8909,7 @@ func (a *OpenTracingAppLayer) GetUserByEmail(email string) (*model.User, *model.
 	return resultVar0, resultVar1
 }
 
-func (a *OpenTracingAppLayer) GetUserByLTI(ltiUserID string) (*model.User, error) {
+func (a *OpenTracingAppLayer) GetUserByLTI(ltiUserID string) (*model.User, *model.AppError) {
 	origCtx := a.ctx
 	span, newCtx := tracing.StartSpanWithParentByContext(a.ctx, "app.GetUserByLTI")
 

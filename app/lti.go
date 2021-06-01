@@ -4,10 +4,12 @@
 package app
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/mattermost/mattermost-server/v5/model"
 	"github.com/mattermost/mattermost-server/v5/shared/mlog"
+	"github.com/mattermost/mattermost-server/v5/store"
 )
 
 func (a *App) GetLMSToUse(consumerKey string) model.LMS {
@@ -86,8 +88,18 @@ func (a *App) SyncLTIChannels(lms model.LMS, launchData map[string]string) *mode
 	return nil
 }
 
-func (a *App) GetUserByLTI(ltiUserID string) (*model.User, error) {
-	return a.Srv().Store.User().GetByLTI(ltiUserID)
+func (a *App) GetUserByLTI(ltiUserID string) (*model.User, *model.AppError) {
+	user, err := a.Srv().Store.User().GetByLTI(ltiUserID)
+	if err != nil {
+		var nfErr *store.ErrNotFound
+		switch {
+		case errors.As(err, &nfErr):
+			return nil, model.NewAppError("GetUserByLTI", MissingAccountError, nil, nfErr.Error(), http.StatusNotFound)
+		default:
+			return nil, model.NewAppError("GetUserByLTI", MissingAccountError, nil, err.Error(), http.StatusInternalServerError)
+		}
+	}
+	return user, nil
 }
 
 // GetLTIUser can be used to get an LTI user by lti user id or email
@@ -97,6 +109,7 @@ func (a *App) GetLTIUser(ltiUserID, email string) *model.User {
 		user, err = a.GetUserByEmail(email)
 	}
 	if err != nil {
+		mlog.Debug("LTI User not found", mlog.String("lti_id", ltiUserID), mlog.String("email", email), mlog.Err(err))
 		// return nil if the user is not found by email or LTI prop
 		return nil
 	}
