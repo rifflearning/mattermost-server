@@ -8,8 +8,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/pkg/errors"
-
 	"github.com/mattermost/mattermost-server/v5/model"
 	"github.com/mattermost/mattermost-server/v5/shared/mlog"
 )
@@ -28,12 +26,12 @@ func (a *App) GetLTISettings() (*model.LTISettings, error) {
 
 	configJson, err := json.Marshal(LTIConfig)
 	if err != nil {
-		return nil, errors.Wrap(err, "Error marshaling LTI Config: %s")
+		return nil, fmt.Errorf("Error marshaling LTI Config: %w", err)
 	}
 
 	var LTISettings *model.LTISettings
 	if err = json.Unmarshal(configJson, &LTISettings); err != nil {
-		return nil, errors.Wrap(err, "Error unmarshaling LTI Config from json: %s")
+		return nil, fmt.Errorf("Error unmarshaling LTI Config from json: %w", err)
 	}
 	return LTISettings, nil
 }
