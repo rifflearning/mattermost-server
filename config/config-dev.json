@@ -426,79 +426,6 @@
         "LoginButtonBorderColor": "#2389D7",
         "LoginButtonTextColor": "#ffffff"
     },
-    "LTISettings": {
-        "Enable": true,
-        "EnableSignatureValidation": false,
-        "LMSs": [
-            {
-                "Name": "Appsembler",
-                "Type": "edx",
-                "OAuthConsumerKey": "edx-appsembler-test_5345",
-                "OAuthConsumerSecret": "secret",
-                "Teams": {
-                    "course-v1:appsembler-the-red+Riff+101": "riff"
-                },
-                "PersonalChannels": {
-                    "Type": "custom-properties",
-                    "ChannelList": {
-                        "plg": {
-                            "NameProperty": "custom_cohort_name",
-                            "IdProperty": "custom_cohort_id"
-                        },
-                        "capstone": {
-                            "NameProperty": "custom_team_name",
-                            "IdProperty": "custom_team_id"
-                        }
-                    }
-                }
-            },
-            {
-                "Name": "BrightScout",
-                "Type": "edx",
-                "OAuthConsumerKey": "brightscout-test_1044",
-                "OAuthConsumerSecret": "secret",
-                "Teams": {
-                    "course-v1:appsembler-the-red+Riff+101": "riff",
-                    "test-context-1": "riff-a",
-                    "test-context-2": "riff-b"
-                },
-                "PersonalChannels": {
-                    "Type": "custom-properties",
-                    "ChannelList": {
-                        "plg": {
-                            "NameProperty": "custom_cohort_name",
-                            "IdProperty": "custom_cohort_id"
-                        },
-                        "capstone": {
-                            "NameProperty": "custom_team_name",
-                            "IdProperty": "custom_team_id"
-                        }
-                    }
-                }
-            },
-            {
-                "Name": "Emeritus",
-                "Type": "canvas",
-                "OAuthConsumerKey": "canvas-emeritus_5863",
-                "OAuthConsumerSecret": "emeritus secret",
-                "Teams": {
-                    "eabb2ed57cf5dec85996803535cbccb4c7f62492": "sloan-1"
-                },
-                "PersonalChannels": {
-                    "Type": "emeritus-groups",
-                    "AuthorizationToken": "dummy~value",
-                    "ChannelList": {
-                        "plg": {
-                            "NameRegEx": "^riff_PLG_"
-                        },
-                        "capstone": {
-                            "NameRegEx": "^riff_Team_"
-                        }
-                    }
-                }
-            }
-        ]
-    },
     "NativeAppSettings": {
         "AppCustomURLSchemes": [
             "mmauth://",
@@ -608,7 +535,81 @@
         "EnableHealthCheck": true,
         "Directory": "./plugins",
         "ClientDirectory": "./client/plugins",
-        "Plugins": {},
+        "Plugins": {
+            "ai.riffanalytics.lti": {
+                "enable": true,
+                "enablesignaturevalidation": false,
+                "lmss": [
+                    {
+                        "Name": "Appsembler",
+                        "Type": "edx",
+                        "OAuthConsumerKey": "edx-appsembler-test_5345",
+                        "OAuthConsumerSecret": "secret",
+                        "Teams": {
+                            "course-v1:appsembler-the-red+Riff+101": "riff"
+                        },
+                        "PersonalChannels": {
+                            "Type": "custom-properties",
+                            "ChannelList": {
+                                "plg": {
+                                    "NameProperty": "custom_cohort_name",
+                                    "IdProperty": "custom_cohort_id"
+                                },
+                                "capstone": {
+                                    "NameProperty": "custom_team_name",
+                                    "IdProperty": "custom_team_id"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "Name": "BrightScout",
+                        "Type": "edx",
+                        "OAuthConsumerKey": "brightscout-test_1044",
+                        "OAuthConsumerSecret": "secret",
+                        "Teams": {
+                            "course-v1:appsembler-the-red+Riff+101": "riff",
+                            "test-context-1": "riff-a",
+                            "test-context-2": "riff-b"
+                        },
+                        "PersonalChannels": {
+                            "Type": "custom-properties",
+                            "ChannelList": {
+                                "plg": {
+                                    "NameProperty": "custom_cohort_name",
+                                    "IdProperty": "custom_cohort_id"
+                                },
+                                "capstone": {
+                                    "NameProperty": "custom_team_name",
+                                    "IdProperty": "custom_team_id"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "Name": "Emeritus",
+                        "Type": "canvas",
+                        "OAuthConsumerKey": "canvas-emeritus_5863",
+                        "OAuthConsumerSecret": "emeritus secret",
+                        "Teams": {
+                            "eabb2ed57cf5dec85996803535cbccb4c7f62492": "sloan-1"
+                        },
+                        "PersonalChannels": {
+                            "Type": "emeritus-groups",
+                            "AuthorizationToken": "dummy~value",
+                            "ChannelList": {
+                                "plg": {
+                                    "NameRegEx": "^riff_PLG_"
+                                },
+                                "capstone": {
+                                    "NameRegEx": "^riff_Team_"
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+        },
         "PluginStates": {
             "com.mattermost.nps": {
                 "Enable": true
