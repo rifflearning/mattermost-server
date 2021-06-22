@@ -252,8 +252,6 @@ func GenerateLimitedClientConfig(c *model.Config, telemetryID string, license *m
 
 	props["EnableSignUpWithGitLab"] = strconv.FormatBool(*c.GitLabSettings.Enable)
 
-	props["EnableSignUpWithLTI"] = strconv.FormatBool(c.LTISettings.Enable)
-
 	props["TermsOfServiceLink"] = *c.SupportSettings.TermsOfServiceLink
 	props["PrivacyPolicyLink"] = *c.SupportSettings.PrivacyPolicyLink
 	props["AboutLink"] = *c.SupportSettings.AboutLink
@@ -310,6 +308,16 @@ func GenerateLimitedClientConfig(c *model.Config, telemetryID string, license *m
 	props["EnforceMultifactorAuthentication"] = "false"
 	props["EnableGuestAccounts"] = strconv.FormatBool(*c.GuestAccountsSettings.Enable)
 	props["GuestAccountsEnforceMultifactorAuthentication"] = strconv.FormatBool(*c.GuestAccountsSettings.EnforceMultifactorAuthentication)
+
+	props["EnableSignUpWithLTI"] = strconv.FormatBool(false)
+
+	// Check if the LTISettings configuration exists, it "belongs" to the LTI_PLUGIN_ID plugin.
+	if LTIConfig, ok := c.PluginSettings.Plugins[model.LTI_PLUGIN_ID]; ok {
+		// Update EnableSignUpWithLTI prop to allow the webapp to check if signup with LTI is enabled.
+		if LTIEnabled, ok := LTIConfig["enable"].(bool); ok {
+			props["EnableSignUpWithLTI"] = strconv.FormatBool(LTIEnabled)
+		}
+	}
 
 	if license != nil {
 		if *license.Features.LDAP {
